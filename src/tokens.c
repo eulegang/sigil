@@ -44,25 +44,60 @@ void arcana_tokens_deinit(arcana_tokens_t *tokens) {
   munmap(tokens, tokens->len);
 }
 
+void calc_meta(const char *base, size_t len, uint16_t *line, uint16_t *col) {
+  for (size_t i = 0; i < len; i++) {
+    if (base[i] == '\n') {
+      *line += 1;
+      *col = 1;
+    } else {
+      *col += 1;
+    }
+  }
+}
+
 bool arcana_process(arcana_tokens_t *tokens, arcana_tokens_options opts) {
   uint16_t cur = 0;
   arcana_token_type type;
 
+  size_t cap = arcana_tokens_capacity(tokens);
+
   arcana_token *base = arcana_tokens_data(tokens);
+  arcana_linemeta *meta = arcana_tokens_linemeta(tokens);
+
+  uint16_t line = 1;
+  uint16_t col = 1;
+
   do {
+    if (tokens->len >= cap) {
+      return false;
+    }
+
     ssize_t inc = opts.tokenizer(cur, opts.content, &type);
     if (inc == 0) {
       return false;
     } else if (inc < 0) {
       cur += -inc;
+
+      calc_meta(opts.content.data + cur, -inc, &line, &col);
     } else {
-      arcana_token t = {
+      if (cur + inc > opts.content.len) {
+        return false;
+      }
+
+      base[tokens->len] = (arcana_token){
           .type = type,
           .off = cur,
           .len = inc,
       };
 
-      base[tokens->len++] = t;
+      meta[tokens->len] = (arcana_linemeta){
+          .column = col,
+          .line = line,
+      };
+
+      tokens->len++;
+
+      calc_meta(opts.content.data + cur, inc, &line, &col);
 
       cur += inc;
     }
@@ -73,6 +108,18 @@ bool arcana_process(arcana_tokens_t *tokens, arcana_tokens_options opts) {
 }
 
 size_t arcana_tokens_len(arcana_tokens_t *table) { return table->len; }
+
 arcana_token *arcana_tokens_data(arcana_tokens_t *table) {
   return (arcana_token *)((void *)table + sizeof(arcana_tokens_t));
+}
+
+arcana_linemeta *arcana_tokens_linemeta(arcana_tokens_t *tokens) {
+  return (arcana_linemeta *)((void *)tokens + sizeof(arcana_tokens_t) +
+                             sizeof(arcana_token) *
+                                 arcana_tokens_capacity(tokens));
+}
+
+size_t arcana_tokens_capacity(arcana_tokens_t *tokens) {
+  return (tokens->cap - sizeof(arcana_tokens_t)) /
+         (sizeof(arcana_token) + sizeof(arcana_linemeta));
 }

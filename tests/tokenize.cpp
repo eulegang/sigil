@@ -40,25 +40,45 @@ TEST(token, tokens) {
   EXPECT_EQ(arcana_tokens_len(tokens), 5);
 
   arcana_token *base = arcana_tokens_data(tokens);
+  arcana_linemeta *meta = arcana_tokens_linemeta(tokens);
+
   EXPECT_EQ(base[0].type, monkey_token_type_let);
   EXPECT_EQ(base[0].off, 0);
   EXPECT_EQ(base[0].len, 3);
+
+  EXPECT_EQ(meta[0].line, 1);
+  EXPECT_EQ(meta[0].column, 1);
 
   EXPECT_EQ(base[1].type, monkey_token_type_ident);
   EXPECT_EQ(base[1].off, 4);
   EXPECT_EQ(base[1].len, 1);
 
+  EXPECT_EQ(meta[1].line, 1);
+  EXPECT_EQ(meta[1].column, 5);
+
   EXPECT_EQ(base[2].type, monkey_token_type_assign);
   EXPECT_EQ(base[2].off, 6);
   EXPECT_EQ(base[2].len, 1);
+
+  EXPECT_EQ(meta[2].line, 1);
+  EXPECT_EQ(meta[2].column, 7);
 
   EXPECT_EQ(base[3].type, monkey_token_type_number);
   EXPECT_EQ(base[3].off, 8);
   EXPECT_EQ(base[3].len, 1);
 
+  EXPECT_EQ(meta[3].line, 1);
+  EXPECT_EQ(meta[3].column, 9);
+
   EXPECT_EQ(base[4].type, monkey_token_type_semi);
   EXPECT_EQ(base[4].off, 9);
   EXPECT_EQ(base[4].len, 1);
+
+  EXPECT_EQ(meta[4].line, 1);
+  EXPECT_EQ(meta[4].column, 10);
+
+  EXPECT_LT(arcana_tokens_capacity(tokens), 100000);
+  EXPECT_GT(arcana_tokens_capacity(tokens), 1000);
 
   arcana_tokens_deinit(tokens);
 }
