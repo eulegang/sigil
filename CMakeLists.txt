@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
-project(les
+project(arcana
   LANGUAGES C CXX
   VERSION 0.1.0
   DESCRIPTION "language framework"
 )
 
 add_library(
-  les SHARED
+  arcana SHARED
   src/token.c
   src/table.c
 )
@@ -22,7 +22,7 @@ add_executable(
 
 target_include_directories(unit PUBLIC ./src)
 target_link_libraries(unit GTest::gtest_main)
-target_link_libraries(unit les)
+target_link_libraries(unit arcana)
 
 add_test(
   NAME unit-tests 

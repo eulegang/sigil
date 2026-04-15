@@ -1,7 +1,7 @@
 #ifndef _MONKEY_H
 #define _MONKEY_H
 
-#include "les.h"
+#include "arcana.h"
 #include <cstddef>
 #include <cstdint>
 
@@ -14,6 +14,7 @@ enum monkey_token_type : uint32_t {
 
 };
 
-ssize_t monkey_tokenizer(size_t cur, les_slice content, les_token_type *type);
+ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
+                         arcana_token_type *type);
 
 #endif

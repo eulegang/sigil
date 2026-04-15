@@ -1,9 +1,9 @@
 
 #include "monkey.h"
-#include "les.h"
+#include "arcana.h"
 
-les_slice pull_word(les_slice content, uint16_t offset) {
-  les_slice s = {.data = content.data + (size_t)offset, .len = 0};
+arcana_slice pull_word(arcana_slice content, uint16_t offset) {
+  arcana_slice s = {.data = content.data + (size_t)offset, .len = 0};
 
   while (offset + s.len < content.len) {
     char c = s.data[s.len];
@@ -23,8 +23,8 @@ les_slice pull_word(les_slice content, uint16_t offset) {
   return s;
 }
 
-les_slice pull_number(les_slice content, uint16_t offset) {
-  les_slice s = {.data = content.data + (size_t)offset, .len = 0};
+arcana_slice pull_number(arcana_slice content, uint16_t offset) {
+  arcana_slice s = {.data = content.data + (size_t)offset, .len = 0};
 
   while (offset + s.len < content.len) {
     char c = s.data[s.len];
@@ -42,18 +42,19 @@ les_slice pull_number(les_slice content, uint16_t offset) {
   return s;
 }
 
-les_token_table_t *monkey_table() {
-  static les_token_table_t *table = NULL;
+arcana_token_table_t *monkey_table() {
+  static arcana_token_table_t *table = NULL;
 
   if (!table) {
-    table = les_token_table_init();
-    les_token_table_push(&table, "let");
+    table = arcana_token_table_init();
+    arcana_token_table_push(&table, "let");
   }
 
   return table;
 }
 
-ssize_t monkey_tokenizer(size_t cur, les_slice content, les_token_type *type) {
+ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
+                         arcana_token_type *type) {
   const char ch = content.data[cur];
   switch (ch) {
   case ' ':
@@ -75,13 +76,13 @@ ssize_t monkey_tokenizer(size_t cur, les_slice content, les_token_type *type) {
   }
 
   if (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch == '_') {
-    les_slice c = pull_word(content, cur);
+    arcana_slice c = pull_word(content, cur);
     *type = monkey_token_type_ident;
     return c.len;
   }
 
   if ('0' <= ch && ch <= '9') {
-    les_slice c = pull_number(content, cur);
+    arcana_slice c = pull_number(content, cur);
     *type = monkey_token_type_number;
     return c.len;
   }
