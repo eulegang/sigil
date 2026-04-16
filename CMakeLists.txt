@@ -30,3 +30,13 @@ add_test(
   COMMAND unit
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/arcana.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/arcana.pc
+    @ONLY
+)
+
+install(TARGETS arcana RUNTIME DESTINATION lib)
+install(FILES src/arcana.h DESTINATION include)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/arcana.pc" DESTINATION lib/pkgconfig)
