@@ -36,12 +36,23 @@ typedef struct {
   arcana_tokenizer tokenizer;
 } arcana_tokens_options;
 
+typedef struct {
+  uint32_t err;
+  uint32_t pos;
+} arcana_tokens_error;
+
+#define ARCANA_TOKENS_ERROR_MAP 1
+#define ARCANA_TOKENS_ERROR_OVERFLOW 2
+#define ARCANA_TOKENS_ERROR_INVALID 3
+
 extern size_t arcana_pages;
 
 typedef struct arcana_tokens arcana_tokens_t;
 typedef struct arcana_token_table arcana_token_table_t;
 
-arcana_tokens_t *arcana_tokens_init(arcana_tokens_options);
+arcana_tokens_t *arcana_tokens_init(arcana_tokens_options,
+                                    arcana_tokens_error *);
+
 void arcana_tokens_deinit(arcana_tokens_t *);
 
 size_t arcana_tokens_len(arcana_tokens_t *);

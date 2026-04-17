@@ -14,9 +14,11 @@ struct arcana_tokens {
 
 size_t arcana_pages = 16;
 
-bool arcana_process(arcana_tokens_t *, arcana_tokens_options opts);
+bool arcana_process(arcana_tokens_t *, arcana_tokens_options,
+                    arcana_tokens_error *);
 
-arcana_tokens_t *arcana_tokens_init(arcana_tokens_options opts) {
+arcana_tokens_t *arcana_tokens_init(arcana_tokens_options opts,
+                                    arcana_tokens_error *error) {
   assert(opts.content.data != NULL);
   assert(opts.content.len != 0);
 
@@ -25,6 +27,10 @@ arcana_tokens_t *arcana_tokens_init(arcana_tokens_options opts) {
       mmap(0, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 
   if (res == MAP_FAILED) {
+    if (error) {
+      error->err = ARCANA_TOKENS_ERROR_MAP;
+      error->pos = 0;
+    }
     return NULL;
   }
 
@@ -32,7 +38,7 @@ arcana_tokens_t *arcana_tokens_init(arcana_tokens_options opts) {
   res->cap = len;
   res->content = opts.content;
 
-  if (!arcana_process(res, opts)) {
+  if (!arcana_process(res, opts, error)) {
     arcana_tokens_deinit(res);
     return NULL;
   }
@@ -55,7 +61,8 @@ void calc_meta(const char *base, size_t len, uint16_t *line, uint16_t *col) {
   }
 }
 
-bool arcana_process(arcana_tokens_t *tokens, arcana_tokens_options opts) {
+bool arcana_process(arcana_tokens_t *tokens, arcana_tokens_options opts,
+                    arcana_tokens_error *error) {
   uint16_t cur = 0;
   arcana_token_type type;
 
@@ -69,17 +76,29 @@ bool arcana_process(arcana_tokens_t *tokens, arcana_tokens_options opts) {
 
   do {
     if (tokens->len >= cap) {
+      if (error) {
+        error->err = ARCANA_TOKENS_ERROR_OVERFLOW;
+        error->pos = cur;
+      }
       return false;
     }
 
     ssize_t inc = opts.tokenizer(cur, opts.content, &type);
     if (inc == 0) {
+      if (error) {
+        error->err = ARCANA_TOKENS_ERROR_INVALID;
+        error->pos = cur;
+      }
       return false;
     } else if (inc < 0) {
       calc_meta(opts.content.data + cur, -inc, &line, &col);
       cur += -inc;
     } else {
       if (cur + inc > opts.content.len) {
+        if (error) {
+          error->err = ARCANA_TOKENS_ERROR_OVERFLOW;
+          error->pos = cur;
+        }
         return false;
       }
 
