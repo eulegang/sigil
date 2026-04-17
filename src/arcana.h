@@ -72,6 +72,8 @@ arcana_slice arcana_slice_advance(arcana_slice, size_t);
 ssize_t arcana_util_take_while(arcana_slice, bool (*)(char));
 ssize_t arcana_util_keyword(arcana_slice, const char *);
 
+ssize_t arcana_util_take_stateful(arcana_slice, void *, bool (*)(void *, char));
+
 #ifdef __cplusplus
 }
 #endif
