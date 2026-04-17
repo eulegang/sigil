@@ -1,6 +1,7 @@
 #ifndef _arcana_H
 #define _arcana_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <sys/types.h>
@@ -55,6 +56,10 @@ void arcana_token_table_deinit(arcana_token_table_t *);
 const char **arcana_token_table_data(arcana_token_table_t *);
 size_t arcana_token_table_len(arcana_token_table_t *);
 void arcana_token_table_push(arcana_token_table_t **, const char *);
+
+arcana_slice arcana_slice_advance(arcana_slice, size_t);
+ssize_t arcana_util_skip_while(arcana_slice, bool (*)(char));
+ssize_t arcana_util_keyword(arcana_slice, const char *);
 
 #ifdef __cplusplus
 }

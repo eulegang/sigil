@@ -9,6 +9,8 @@ add_library(
   arcana SHARED
   src/tokens.c
   src/table.c
+  src/util.c
+  src/slice.c
 )
 
 find_package(GTest REQUIRED)
