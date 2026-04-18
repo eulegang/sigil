@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include "arcana.h"
-#include "monkey.h"
 
 TEST(token_table, insertion) {
   arcana_token_table_t *table = arcana_token_table_init();
