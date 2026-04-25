@@ -15,6 +15,12 @@ typedef struct {
   size_t len;
 } arcana_slice;
 
+arcana_slice arcana_slice_advance(arcana_slice, size_t);
+
+/**
+ * Tokens
+ */
+
 typedef uint32_t arcana_token_type;
 
 typedef struct {
@@ -48,8 +54,6 @@ typedef struct {
 extern size_t arcana_pages;
 
 typedef struct arcana_tokens arcana_tokens_t;
-typedef struct arcana_token_table arcana_token_table_t;
-
 arcana_tokens_t *arcana_tokens_init(arcana_tokens_options,
                                     arcana_tokens_error *);
 
@@ -61,6 +65,12 @@ arcana_token *arcana_tokens_data(arcana_tokens_t *);
 arcana_linemeta *arcana_tokens_linemeta(arcana_tokens_t *);
 arcana_slice arcana_tokens_slice(arcana_tokens_t *, uint16_t);
 
+/**
+ * Token Table
+ */
+
+typedef struct arcana_token_table arcana_token_table_t;
+
 arcana_token_table_t *arcana_token_table_init();
 void arcana_token_table_deinit(arcana_token_table_t *);
 
@@ -68,10 +78,12 @@ const char **arcana_token_table_data(arcana_token_table_t *);
 size_t arcana_token_table_len(arcana_token_table_t *);
 void arcana_token_table_push(arcana_token_table_t **, const char *);
 
-arcana_slice arcana_slice_advance(arcana_slice, size_t);
+/*
+ * Lexer Util
+ */
+
 ssize_t arcana_util_take_while(arcana_slice, bool (*)(char));
 ssize_t arcana_util_keyword(arcana_slice, const char *);
-
 ssize_t arcana_util_take_stateful(arcana_slice, void *, bool (*)(void *, char));
 
 #ifdef __cplusplus
