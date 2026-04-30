@@ -4,7 +4,8 @@
 #include <iostream>
 #include <string>
 
-void monkey_debug_tree(arcana_parse_node node, void *, size_t level) {
+void monkey_debug_tree(arcana_parse_node node, void *addr, size_t level,
+                       arcana_slice content) {
   auto ty = (monkey_node_type)node.type;
 
   std::cout << std::string(2 * level, ' ');
@@ -14,12 +15,17 @@ void monkey_debug_tree(arcana_parse_node node, void *, size_t level) {
     std::cout << "let" << std::endl;
     break;
 
-  case monkey_node_type::ident:
-    std::cout << "ident" << std::endl;
-    break;
+  case monkey_node_type::ident: {
+    monkey_slice ms = *(monkey_slice *)addr;
+    std::string_view slice{content.data + ms.base, ms.len};
 
-  case monkey_node_type::lit:
-    std::cout << "lit" << std::endl;
-    break;
+    std::cout << "ident" << " (" << slice << ")" << std::endl;
+  } break;
+
+  case monkey_node_type::lit: {
+    monkey_slice ms = *(monkey_slice *)addr;
+    std::string_view slice{content.data + ms.base, ms.len};
+    std::cout << "lit" << " (" << slice << ")" << std::endl;
+  } break;
   }
 }

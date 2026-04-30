@@ -127,9 +127,10 @@ uint16_t arcana_parser_ast_node_count(arcana_parser_ast *);
 uint16_t arcana_parser_ast_data_size(arcana_parser_ast *);
 void *arcana_parser_ast_data(arcana_parser_ast *);
 
-void arcana_parser_ast_visit(arcana_parser_ast *ast,
-                             void (*fn)(arcana_parse_node node, void *data,
-                                        size_t level));
+typedef void (*arcana_parser_ast_visit_fn)(arcana_parse_node node, void *data,
+                                           size_t level, arcana_slice content);
+void arcana_parser_ast_visit(arcana_parser_ast *ast, arcana_slice content,
+                             arcana_parser_ast_visit_fn fn);
 
 /*
  * Lexer Util

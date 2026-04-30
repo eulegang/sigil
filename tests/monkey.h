@@ -37,6 +37,7 @@ ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
 
 arcana_parser_state monkey_parse_file(arcana_parser_state);
 
-void monkey_debug_tree(arcana_parse_node node, void *data, size_t level);
+void monkey_debug_tree(arcana_parse_node node, void *data, size_t level,
+                       arcana_slice content);
 
 #endif

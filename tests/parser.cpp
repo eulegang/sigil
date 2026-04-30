@@ -75,7 +75,7 @@ TEST(parse, basic) {
   EXPECT_EQ(addr[3].base, 19);
   EXPECT_EQ(addr[3].len, 2);
 
-  arcana_parser_ast_visit(ast, monkey_debug_tree);
+  arcana_parser_ast_visit(ast, content, monkey_debug_tree);
 
   arcana_parser_ast_deinit(ast);
   arcana_parser_deinit(parser);
@@ -85,6 +85,7 @@ TEST(parse, basic) {
 TEST(parse, expr) {
   static const char *buffer =
       "let x = 1;\nlet y = 12;let z = (x + 1) + 3 * (y + 1)";
+  std::string_view sv{buffer};
 
   arcana_slice content = {.data = buffer, .len = strlen(buffer)};
 
@@ -93,8 +94,10 @@ TEST(parse, expr) {
       .tokenizer = monkey_tokenizer,
   };
 
-  arcana_tokens_t *tokens = arcana_tokens_init(opts, NULL);
-  ASSERT_NE(tokens, nullptr);
+  arcana_tokens_error err;
+  arcana_tokens_t *tokens = arcana_tokens_init(opts, &err);
+  ASSERT_NE(tokens, nullptr)
+      << std::format("position {} {}", err.pos, sv.substr(err.pos));
 
   arcana_parser *parser = arcana_parser_init(monkey_parse_file);
 

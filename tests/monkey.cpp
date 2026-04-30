@@ -88,6 +88,10 @@ ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
     *type = monkey_token_type_minus;
     return 1;
 
+  case '*':
+    *type = monkey_token_type_mult;
+    return 1;
+
   case '/':
     *type = monkey_token_type_div;
     return 1;
