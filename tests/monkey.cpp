@@ -79,7 +79,7 @@ ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
     return 1;
 
   case ')':
-    *type = token(lparen);
+    *type = token(rparen);
     return 1;
 
   case '+':

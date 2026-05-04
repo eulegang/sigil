@@ -36,12 +36,24 @@ enum class monkey_node_type : uint16_t {
   div,
 };
 
+enum class monkey_perc : size_t {
+  LOWEST,
+
+  SUM,
+  PROD,
+
+  HIGHEST,
+};
+
 ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
                          arcana_token_type *type);
 
 arcana_parser_state monkey_parse_file(arcana_parser_state);
 
 void monkey_debug_tree(arcana_parse_node node, void *data, size_t level,
-                       arcana_slice content);
+                       arcana_slice content, void *);
+
+void monkey_init_system(void) __attribute__((constructor));
+void monkey_deinit_system(void) __attribute__((destructor));
 
 #endif

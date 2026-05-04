@@ -113,6 +113,7 @@ arcana_parser_ast *arcana_parser_parse(arcana_parser *, arcana_tokens_t *);
 void arcana_parser_ast_deinit(arcana_parser_ast *);
 
 arcana_token arcana_parser_token(arcana_parser_state);
+arcana_token arcana_parser_peek_token(arcana_parser_state, size_t);
 arcana_parser_state arcana_parser_expect_token(arcana_parser_state,
                                                arcana_token_type);
 
@@ -128,9 +129,43 @@ uint16_t arcana_parser_ast_data_size(arcana_parser_ast *);
 void *arcana_parser_ast_data(arcana_parser_ast *);
 
 typedef void (*arcana_parser_ast_visit_fn)(arcana_parse_node node, void *data,
-                                           size_t level, arcana_slice content);
+                                           size_t level, arcana_slice content,
+                                           void *ctx);
 void arcana_parser_ast_visit(arcana_parser_ast *ast, arcana_slice content,
-                             arcana_parser_ast_visit_fn fn);
+                             void *ctx, arcana_parser_ast_visit_fn fn);
+
+/*
+ * Pratt parsing
+ */
+
+typedef struct arcana_parser_pratt arcana_parser_pratt;
+typedef arcana_parser_state (*arcana_parser_pratt_prefix_parser)(
+    arcana_parser_state);
+typedef arcana_parser_state (*arcana_parser_pratt_infix_parser)(
+    arcana_parser_state, uint16_t);
+typedef arcana_parser_state (*arcana_parser_pratt_postfix_parser)(
+    arcana_parser_state);
+
+arcana_parser_pratt *
+arcana_parser_pratt_init(size_t cap, bool (*is_terminal)(arcana_token_type));
+void arcana_parser_pratt_deinit(arcana_parser_pratt *);
+
+void arcana_parser_pratt_add_prefix(arcana_parser_pratt *, arcana_token_type,
+                                    arcana_parser_pratt_prefix_parser);
+
+void arcana_parser_pratt_add_infix(arcana_parser_pratt *, arcana_token_type,
+                                   arcana_parser_pratt_infix_parser);
+
+void arcana_parser_pratt_add_postfix(arcana_parser_pratt *, arcana_token_type,
+                                     arcana_parser_pratt_postfix_parser);
+
+void arcana_parser_pratt_add_precedence(arcana_parser_pratt *,
+                                        arcana_token_type, size_t);
+
+size_t arcana_parser_pratt_precedence(arcana_parser_pratt *, arcana_token_type);
+
+arcana_parser_state arcana_parser_pratt_parse(arcana_parser_pratt *,
+                                              arcana_parser_state, size_t);
 
 /*
  * Lexer Util

@@ -73,6 +73,10 @@ arcana_token arcana_parser_token(arcana_parser_state state) {
   return arcana_tokens_data(state.tokens)[state.token_cursor];
 }
 
+arcana_token arcana_parser_peek_token(arcana_parser_state state, size_t off) {
+  return arcana_tokens_data(state.tokens)[state.token_cursor + off];
+}
+
 arcana_parser_state arcana_parser_expect_token(arcana_parser_state state,
                                                arcana_token_type token_type) {
   arcana_token token = arcana_parser_token(state);
@@ -121,7 +125,8 @@ bool arcana_parser_state_done(arcana_parser_state state) {
 }
 
 void arcana_parser_ast_visit_recur(arcana_parser_ast *ast, arcana_slice content,
-                                   arcana_parse_node node, size_t level,
+                                   void *ctx, arcana_parse_node node,
+                                   size_t level,
                                    arcana_parser_ast_visit_fn fn) {
   void *addr = NULL;
 
@@ -129,21 +134,22 @@ void arcana_parser_ast_visit_recur(arcana_parser_ast *ast, arcana_slice content,
     addr = arcana_parser_ast_data(ast) + node.offset;
   }
 
-  fn(node, addr, level, content);
+  fn(node, addr, level, content, ctx);
 
   if (node.child != 0) {
-    arcana_parser_ast_visit_recur(
-        ast, content, arcana_parser_ast_nodes(ast)[node.child], level + 1, fn);
+    arcana_parser_ast_visit_recur(ast, content, ctx,
+                                  arcana_parser_ast_nodes(ast)[node.child],
+                                  level + 1, fn);
   }
 
   if (node.next != 0) {
     arcana_parser_ast_visit_recur(
-        ast, content, arcana_parser_ast_nodes(ast)[node.next], level, fn);
+        ast, content, ctx, arcana_parser_ast_nodes(ast)[node.next], level, fn);
   }
 }
 
 void arcana_parser_ast_visit(arcana_parser_ast *ast, arcana_slice content,
-                             arcana_parser_ast_visit_fn fn) {
+                             void *ctx, arcana_parser_ast_visit_fn fn) {
   if (ast->nodes == 0) {
     return;
   }
@@ -152,5 +158,5 @@ void arcana_parser_ast_visit(arcana_parser_ast *ast, arcana_slice content,
   arcana_parse_node *base = arcana_parser_ast_nodes(ast);
   arcana_parse_node node = base[cur];
 
-  arcana_parser_ast_visit_recur(ast, content, node, 0, fn);
+  arcana_parser_ast_visit_recur(ast, content, ctx, node, 0, fn);
 }

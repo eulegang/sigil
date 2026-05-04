@@ -12,6 +12,7 @@ add_library(
   src/util.c
   src/slice.c
   src/parser.c
+  src/pratt.c
 )
 
 find_package(GTest REQUIRED)

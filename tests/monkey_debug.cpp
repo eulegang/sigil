@@ -5,41 +5,44 @@
 #include <string>
 
 void monkey_debug_tree(arcana_parse_node node, void *addr, size_t level,
-                       arcana_slice content) {
+                       arcana_slice content, void *ctx) {
+
+  std::ostream &out = *(std::ostream *)ctx;
+
   auto ty = (monkey_node_type)node.type;
 
-  std::cout << std::string(2 * level, ' ');
+  out << std::string(2 * level, ' ');
 
   switch (ty) {
   case monkey_node_type::let:
-    std::cout << "let" << std::endl;
+    out << "let" << std::endl;
     break;
 
   case monkey_node_type::ident: {
     monkey_slice ms = *(monkey_slice *)addr;
     std::string_view slice{content.data + ms.base, ms.len};
 
-    std::cout << "ident" << " (" << slice << ")" << std::endl;
+    out << "ident" << " (" << slice << ")" << std::endl;
   } break;
 
   case monkey_node_type::lit: {
     monkey_slice ms = *(monkey_slice *)addr;
     std::string_view slice{content.data + ms.base, ms.len};
-    std::cout << "lit" << " (" << slice << ")" << std::endl;
+    out << "lit" << " (" << slice << ")" << std::endl;
   } break;
 
   case monkey_node_type::sub:
-    std::cout << "-" << std::endl;
+    out << "-" << std::endl;
     break;
 
   case monkey_node_type::add:
-    std::cout << "+" << std::endl;
+    out << "+" << std::endl;
     break;
   case monkey_node_type::mult:
-    std::cout << "*" << std::endl;
+    out << "*" << std::endl;
     break;
   case monkey_node_type::div:
-    std::cout << "/" << std::endl;
+    out << "/" << std::endl;
     break;
   }
 }
