@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 
+extern arcana_parser *monkey_parser;
 struct monkey_slice {
   uint16_t base;
   uint16_t len;
@@ -48,9 +49,9 @@ enum class monkey_perc : size_t {
 ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
                          arcana_token_type *type);
 
-arcana_parser_state monkey_parse_file(arcana_parser_state);
+arcana_state monkey_parse_file(arcana_state);
 
-void monkey_debug_tree(arcana_parse_node node, void *data, size_t level,
+void monkey_debug_tree(arcana_node node, void *data, size_t level,
                        arcana_slice content, void *);
 
 void monkey_init_system(void) __attribute__((constructor));

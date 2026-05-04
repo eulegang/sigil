@@ -10,6 +10,10 @@
 extern "C" {
 #endif
 
+/**
+ * Slice of content
+ */
+
 typedef struct {
   const char *data;
   size_t len;
@@ -53,119 +57,105 @@ typedef struct {
 
 extern size_t arcana_pages;
 
-typedef struct arcana_tokens arcana_tokens_t;
-arcana_tokens_t *arcana_tokens_init(arcana_tokens_options,
-                                    arcana_tokens_error *);
+typedef struct arcana_tokens arcana_tokens;
+arcana_tokens *arcana_tokens_init(arcana_tokens_options, arcana_tokens_error *);
 
-void arcana_tokens_deinit(arcana_tokens_t *);
+void arcana_tokens_deinit(arcana_tokens *);
 
-size_t arcana_tokens_len(arcana_tokens_t *);
-size_t arcana_tokens_capacity(arcana_tokens_t *);
-arcana_token *arcana_tokens_data(arcana_tokens_t *);
-arcana_linemeta *arcana_tokens_linemeta(arcana_tokens_t *);
-arcana_slice arcana_tokens_slice(arcana_tokens_t *, uint16_t);
+size_t arcana_tokens_len(arcana_tokens *);
+size_t arcana_tokens_capacity(arcana_tokens *);
+arcana_token *arcana_tokens_data(arcana_tokens *);
+arcana_linemeta *arcana_tokens_linemeta(arcana_tokens *);
+arcana_slice arcana_tokens_slice(arcana_tokens *, uint16_t);
 
 /**
  * Token Table
  */
 
-typedef struct arcana_token_table arcana_token_table_t;
+typedef struct arcana_table arcana_table;
 
-arcana_token_table_t *arcana_token_table_init();
-void arcana_token_table_deinit(arcana_token_table_t *);
+arcana_table *arcana_table_init();
+void arcana_table_deinit(arcana_table *);
 
-const char **arcana_token_table_data(arcana_token_table_t *);
-size_t arcana_token_table_len(arcana_token_table_t *);
-void arcana_token_table_push(arcana_token_table_t **, const char *);
+const char **arcana_table_data(arcana_table *);
+size_t arcana_table_len(arcana_table *);
+void arcana_table_push(arcana_table **, const char *);
 
-/*
- * Parser
+/**
+ * Ast
  */
-
-typedef struct arcana_parser_ast arcana_parser_ast;
-
-typedef struct arcana_parser_state {
-  arcana_tokens_t *tokens;
-  arcana_parser_ast *ast;
-
-  uint16_t token_cursor;
-  uint16_t node_cursor;
-  uint16_t data_cursor;
-  uint16_t subroot;
-  uint16_t status;
-} arcana_parser_state;
-
-typedef struct arcana_parser arcana_parser;
-
-typedef arcana_parser_state (*arcana_parser_branch_prefix)(arcana_parser_state);
 
 typedef struct {
   uint16_t child;
   uint16_t next;
   uint16_t offset;
   uint16_t type;
-} arcana_parse_node;
+} arcana_node;
 
-arcana_parser *arcana_parser_init(arcana_parser_branch_prefix);
-void arcana_parser_deinit(arcana_parser *);
+typedef struct arcana_ast arcana_ast;
 
-arcana_parser_ast *arcana_parser_parse(arcana_parser *, arcana_tokens_t *);
-void arcana_parser_ast_deinit(arcana_parser_ast *);
+void arcana_ast_deinit(arcana_ast *);
 
-arcana_token arcana_parser_token(arcana_parser_state);
-arcana_token arcana_parser_peek_token(arcana_parser_state, size_t);
-arcana_parser_state arcana_parser_expect_token(arcana_parser_state,
-                                               arcana_token_type);
+arcana_node *arcana_ast_nodes(arcana_ast *);
+uint16_t arcana_ast_node_count(arcana_ast *);
+uint16_t arcana_ast_data_size(arcana_ast *);
+void *arcana_ast_data(arcana_ast *);
 
-uint16_t arcana_parser_ast_malloc(arcana_parser_state *, size_t);
-uint16_t arcana_parser_alloc_node(arcana_parser_state *);
+typedef void (*arcana_ast_visit_fn)(arcana_node node, void *data, size_t level,
+                                    arcana_slice content, void *ctx);
 
-void arcana_parser_ast_next_token(arcana_parser_state *);
-bool arcana_parser_state_done(arcana_parser_state);
-
-arcana_parse_node *arcana_parser_ast_nodes(arcana_parser_ast *);
-uint16_t arcana_parser_ast_node_count(arcana_parser_ast *);
-uint16_t arcana_parser_ast_data_size(arcana_parser_ast *);
-void *arcana_parser_ast_data(arcana_parser_ast *);
-
-typedef void (*arcana_parser_ast_visit_fn)(arcana_parse_node node, void *data,
-                                           size_t level, arcana_slice content,
-                                           void *ctx);
-void arcana_parser_ast_visit(arcana_parser_ast *ast, arcana_slice content,
-                             void *ctx, arcana_parser_ast_visit_fn fn);
+void arcana_ast_visit(arcana_ast *ast, arcana_slice content, void *ctx,
+                      arcana_ast_visit_fn fn);
 
 /*
- * Pratt parsing
+ * State
  */
 
-typedef struct arcana_parser_pratt arcana_parser_pratt;
-typedef arcana_parser_state (*arcana_parser_pratt_prefix_parser)(
-    arcana_parser_state);
-typedef arcana_parser_state (*arcana_parser_pratt_infix_parser)(
-    arcana_parser_state, uint16_t);
-typedef arcana_parser_state (*arcana_parser_pratt_postfix_parser)(
-    arcana_parser_state);
+typedef struct arcana_state {
+  arcana_tokens *tokens;
+  arcana_ast *ast;
 
-arcana_parser_pratt *
-arcana_parser_pratt_init(size_t cap, bool (*is_terminal)(arcana_token_type));
-void arcana_parser_pratt_deinit(arcana_parser_pratt *);
+  uint16_t token_cursor;
+  uint16_t node_cursor;
+  uint16_t data_cursor;
+  uint16_t subroot;
+  uint16_t status;
+} arcana_state;
 
-void arcana_parser_pratt_add_prefix(arcana_parser_pratt *, arcana_token_type,
-                                    arcana_parser_pratt_prefix_parser);
+arcana_token arcana_state_token(arcana_state);
+arcana_token arcana_state_peek(arcana_state, size_t);
+arcana_state arcana_state_expect_token(arcana_state, arcana_token_type);
 
-void arcana_parser_pratt_add_infix(arcana_parser_pratt *, arcana_token_type,
-                                   arcana_parser_pratt_infix_parser);
+uint16_t arcana_state_malloc(arcana_state *, size_t);
+uint16_t arcana_state_alloc_node(arcana_state *);
 
-void arcana_parser_pratt_add_postfix(arcana_parser_pratt *, arcana_token_type,
-                                     arcana_parser_pratt_postfix_parser);
+void arcana_state_next(arcana_state *);
+bool arcana_state_done(arcana_state);
 
-void arcana_parser_pratt_add_precedence(arcana_parser_pratt *,
-                                        arcana_token_type, size_t);
+/*
+ * Parser
+ */
 
-size_t arcana_parser_pratt_precedence(arcana_parser_pratt *, arcana_token_type);
+typedef struct arcana_parser arcana_parser;
+typedef arcana_state (*arcana_subparser)(arcana_state);
+typedef arcana_state (*arcana_binparser)(arcana_state, uint16_t);
+typedef bool (*arcana_terminal)(arcana_token_type);
+typedef struct {
+  arcana_subparser prefix;
+  arcana_subparser postfix;
+  arcana_binparser infix;
+  size_t perc;
+} arcana_parser_slot;
 
-arcana_parser_state arcana_parser_pratt_parse(arcana_parser_pratt *,
-                                              arcana_parser_state, size_t);
+arcana_parser *arcana_parser_init(size_t cap, arcana_terminal,
+                                  arcana_subparser);
+
+void arcana_parser_deinit(arcana_parser *);
+
+arcana_parser_slot *arcana_parser_slots(arcana_parser *);
+
+arcana_ast *arcana_parser_parse(arcana_parser *, arcana_tokens *);
+arcana_state arcana_parser_parse_expr(arcana_parser *, arcana_state, size_t);
 
 /*
  * Lexer Util

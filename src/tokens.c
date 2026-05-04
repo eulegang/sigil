@@ -14,16 +14,16 @@ struct arcana_tokens {
 
 size_t arcana_pages = 16;
 
-bool arcana_process(arcana_tokens_t *, arcana_tokens_options,
+bool arcana_process(arcana_tokens *, arcana_tokens_options,
                     arcana_tokens_error *);
 
-arcana_tokens_t *arcana_tokens_init(arcana_tokens_options opts,
-                                    arcana_tokens_error *error) {
+arcana_tokens *arcana_tokens_init(arcana_tokens_options opts,
+                                  arcana_tokens_error *error) {
   assert(opts.content.data != NULL);
   assert(opts.content.len != 0);
 
   size_t len = arcana_pages * getpagesize();
-  arcana_tokens_t *res =
+  arcana_tokens *res =
       mmap(0, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 
   if (res == MAP_FAILED) {
@@ -46,7 +46,7 @@ arcana_tokens_t *arcana_tokens_init(arcana_tokens_options opts,
   return res;
 }
 
-void arcana_tokens_deinit(arcana_tokens_t *tokens) {
+void arcana_tokens_deinit(arcana_tokens *tokens) {
   munmap(tokens, tokens->cap);
 }
 
@@ -61,7 +61,7 @@ void calc_meta(const char *base, size_t len, uint16_t *line, uint16_t *col) {
   }
 }
 
-bool arcana_process(arcana_tokens_t *tokens, arcana_tokens_options opts,
+bool arcana_process(arcana_tokens *tokens, arcana_tokens_options opts,
                     arcana_tokens_error *error) {
   uint16_t cur = 0;
   arcana_token_type type;
@@ -125,24 +125,24 @@ bool arcana_process(arcana_tokens_t *tokens, arcana_tokens_options opts,
   return true;
 }
 
-size_t arcana_tokens_len(arcana_tokens_t *table) { return table->len; }
+size_t arcana_tokens_len(arcana_tokens *table) { return table->len; }
 
-arcana_token *arcana_tokens_data(arcana_tokens_t *table) {
-  return (arcana_token *)((void *)table + sizeof(arcana_tokens_t));
+arcana_token *arcana_tokens_data(arcana_tokens *table) {
+  return (arcana_token *)((void *)table + sizeof(arcana_tokens));
 }
 
-arcana_linemeta *arcana_tokens_linemeta(arcana_tokens_t *tokens) {
-  return (arcana_linemeta *)((void *)tokens + sizeof(arcana_tokens_t) +
+arcana_linemeta *arcana_tokens_linemeta(arcana_tokens *tokens) {
+  return (arcana_linemeta *)((void *)tokens + sizeof(arcana_tokens) +
                              sizeof(arcana_token) *
                                  arcana_tokens_capacity(tokens));
 }
 
-size_t arcana_tokens_capacity(arcana_tokens_t *tokens) {
-  return (tokens->cap - sizeof(arcana_tokens_t)) /
+size_t arcana_tokens_capacity(arcana_tokens *tokens) {
+  return (tokens->cap - sizeof(arcana_tokens)) /
          (sizeof(arcana_token) + sizeof(arcana_linemeta));
 }
 
-arcana_slice arcana_tokens_slice(arcana_tokens_t *tokens, uint16_t index) {
+arcana_slice arcana_tokens_slice(arcana_tokens *tokens, uint16_t index) {
   arcana_token *elem = arcana_tokens_data(tokens);
   elem += index;
 

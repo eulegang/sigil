@@ -14,7 +14,7 @@ TEST(token, tokens) {
       .tokenizer = monkey_tokenizer,
   };
 
-  arcana_tokens_t *tokens = arcana_tokens_init(opts, NULL);
+  arcana_tokens *tokens = arcana_tokens_init(opts, NULL);
   ASSERT_NE(tokens, nullptr);
 
   EXPECT_EQ(arcana_tokens_len(tokens), 10);
@@ -116,7 +116,7 @@ TEST(token, capacity) {
       .tokenizer = monkey_tokenizer,
   };
 
-  arcana_tokens_t *tokens = arcana_tokens_init(opts, NULL);
+  arcana_tokens *tokens = arcana_tokens_init(opts, NULL);
 
   ASSERT_NE(tokens, nullptr);
 

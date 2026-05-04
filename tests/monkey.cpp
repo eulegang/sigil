@@ -44,12 +44,12 @@ arcana_slice pull_number(arcana_slice content, uint16_t offset) {
   return s;
 }
 
-arcana_token_table_t *monkey_table() {
-  static arcana_token_table_t *table = NULL;
+arcana_table *monkey_table() {
+  static arcana_table *table = NULL;
 
   if (!table) {
-    table = arcana_token_table_init();
-    arcana_token_table_push(&table, "let");
+    table = arcana_table_init();
+    arcana_table_push(&table, "let");
   }
 
   return table;

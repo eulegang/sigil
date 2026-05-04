@@ -11,8 +11,9 @@ add_library(
   src/table.c
   src/util.c
   src/slice.c
-  src/parser.c
-  src/pratt.c
+  src/parse.c
+  src/ast.c
+  src/state.c
 )
 
 find_package(GTest REQUIRED)

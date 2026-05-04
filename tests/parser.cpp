@@ -16,21 +16,19 @@ TEST(parse, basic) {
       .tokenizer = monkey_tokenizer,
   };
 
-  arcana_tokens_t *tokens = arcana_tokens_init(opts, NULL);
+  arcana_tokens *tokens = arcana_tokens_init(opts, NULL);
   ASSERT_NE(tokens, nullptr);
 
-  arcana_parser *parser = arcana_parser_init(monkey_parse_file);
-
-  arcana_parser_ast *ast = arcana_parser_parse(parser, tokens);
+  arcana_ast *ast = arcana_parser_parse(monkey_parser, tokens);
   ASSERT_NE(ast, nullptr);
 
-  std::span<arcana_parse_node> nodes{
-      arcana_parser_ast_nodes(ast),
-      arcana_parser_ast_node_count(ast),
+  std::span<arcana_node> nodes{
+      arcana_ast_nodes(ast),
+      arcana_ast_node_count(ast),
   };
 
   ASSERT_EQ(nodes.size(), 6);
-  ASSERT_EQ(arcana_parser_ast_data_size(ast), 16);
+  ASSERT_EQ(arcana_ast_data_size(ast), 16);
 
   EXPECT_EQ(nodes[0].child, 1);
   EXPECT_EQ(nodes[0].next, 3);
@@ -62,7 +60,7 @@ TEST(parse, basic) {
   EXPECT_EQ(nodes[5].offset, 12);
   EXPECT_EQ(nodes[5].type, (uint16_t)monkey_node_type::lit);
 
-  monkey_slice *addr = (monkey_slice *)arcana_parser_ast_data(ast);
+  monkey_slice *addr = (monkey_slice *)arcana_ast_data(ast);
 
   EXPECT_EQ(addr[0].base, 4);
   EXPECT_EQ(addr[0].len, 1);
@@ -76,8 +74,7 @@ TEST(parse, basic) {
   EXPECT_EQ(addr[3].base, 19);
   EXPECT_EQ(addr[3].len, 2);
 
-  arcana_parser_ast_deinit(ast);
-  arcana_parser_deinit(parser);
+  arcana_ast_deinit(ast);
   arcana_tokens_deinit(tokens);
 }
 
@@ -94,20 +91,18 @@ TEST(parse, expr) {
   };
 
   arcana_tokens_error err;
-  arcana_tokens_t *tokens = arcana_tokens_init(opts, &err);
+  arcana_tokens *tokens = arcana_tokens_init(opts, &err);
   ASSERT_NE(tokens, nullptr)
       << std::format("position {} {}", err.pos, sv.substr(err.pos));
 
-  arcana_parser *parser = arcana_parser_init(monkey_parse_file);
-
-  arcana_parser_ast *ast = arcana_parser_parse(parser, tokens);
+  arcana_ast *ast = arcana_parser_parse(monkey_parser, tokens);
   ASSERT_NE(ast, nullptr);
 
   std::stringstream *output = new std::stringstream();
-  arcana_parser_ast_visit(ast, content, output, monkey_debug_tree);
-  std::span<arcana_parse_node> nodes{
-      arcana_parser_ast_nodes(ast),
-      arcana_parser_ast_node_count(ast),
+  arcana_ast_visit(ast, content, output, monkey_debug_tree);
+  std::span<arcana_node> nodes{
+      arcana_ast_nodes(ast),
+      arcana_ast_node_count(ast),
   };
 
   std::string s = output->str();
@@ -132,9 +127,8 @@ TEST(parse, expr) {
                "");
 
   ASSERT_EQ(nodes.size(), 17);
-  ASSERT_EQ(arcana_parser_ast_data_size(ast), 56);
+  ASSERT_EQ(arcana_ast_data_size(ast), 56);
 
-  arcana_parser_ast_deinit(ast);
-  arcana_parser_deinit(parser);
+  arcana_ast_deinit(ast);
   arcana_tokens_deinit(tokens);
 }
