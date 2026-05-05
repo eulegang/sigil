@@ -1,5 +1,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 #include <sstream>
 
 #include "arcana.h"
@@ -98,8 +99,9 @@ TEST(parse, expr) {
   arcana_ast *ast = arcana_parser_parse(monkey_parser, tokens);
   ASSERT_NE(ast, nullptr);
 
-  std::stringstream *output = new std::stringstream();
-  arcana_ast_visit(ast, content, output, monkey_debug_tree);
+  std::shared_ptr<std::stringstream> output =
+      std::make_shared<std::stringstream>();
+  arcana_ast_visit(ast, content, output.get(), monkey_debug_tree);
   std::span<arcana_node> nodes{
       arcana_ast_nodes(ast),
       arcana_ast_node_count(ast),
