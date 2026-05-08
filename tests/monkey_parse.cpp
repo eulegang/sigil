@@ -116,9 +116,12 @@ arcana_state monkey_parse_file(arcana_state state) {
     if (last != 0xFFFF) {
       arcana_node *node = arcana_ast_nodes(state.ast) + last;
       node->next = state.subroot;
+      last = state.subroot;
+    } else {
+      arcana_node *node = arcana_ast_nodes(state.ast);
+      node[0] = node[state.subroot];
+      last = 0;
     }
-
-    last = state.subroot;
 
     if (state.status) {
       return state;

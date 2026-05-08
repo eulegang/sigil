@@ -129,6 +129,9 @@ arcana_state arcana_state_expect_token(arcana_state, arcana_token_type);
 uint16_t arcana_state_malloc(arcana_state *, size_t);
 uint16_t arcana_state_alloc_node(arcana_state *);
 
+arcana_node *arcana_state_node(arcana_state, uint16_t);
+void *arcana_state_data(arcana_state, uint16_t);
+
 void arcana_state_next(arcana_state *);
 bool arcana_state_done(arcana_state);
 
@@ -147,6 +150,11 @@ typedef struct {
   size_t perc;
 } arcana_parser_slot;
 
+typedef struct {
+  uint16_t token;
+  uint16_t status;
+} arcana_parser_error;
+
 arcana_parser *arcana_parser_init(size_t cap, arcana_terminal,
                                   arcana_subparser);
 
@@ -154,7 +162,8 @@ void arcana_parser_deinit(arcana_parser *);
 
 arcana_parser_slot *arcana_parser_slots(arcana_parser *);
 
-arcana_ast *arcana_parser_parse(arcana_parser *, arcana_tokens *);
+arcana_ast *arcana_parser_parse(arcana_parser *, arcana_tokens *,
+                                arcana_parser_error *);
 arcana_state arcana_parser_parse_expr(arcana_parser *, arcana_state, size_t);
 
 /*

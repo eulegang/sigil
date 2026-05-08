@@ -32,6 +32,14 @@ uint16_t arcana_state_alloc_node(arcana_state *state) {
   return state->node_cursor++;
 }
 
+arcana_node *arcana_state_node(arcana_state state, uint16_t idx) {
+  return arcana_ast_nodes(state.ast) + idx;
+}
+
+void *arcana_state_data(arcana_state state, uint16_t idx) {
+  return (void *)((char *)arcana_ast_data(state.ast) + idx);
+}
+
 void arcana_state_next(arcana_state *state) {
   if (state->token_cursor >= arcana_tokens_len(state->tokens)) {
     state->status |= 2;

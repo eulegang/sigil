@@ -67,7 +67,8 @@ arcana_state arcana_parser_parse_expr(arcana_parser *self, arcana_state state,
   return state;
 }
 
-arcana_ast *arcana_parser_parse(arcana_parser *parser, arcana_tokens *tokens) {
+arcana_ast *arcana_parser_parse(arcana_parser *parser, arcana_tokens *tokens,
+                                arcana_parser_error *error) {
   size_t len = arcana_pages * getpagesize();
 
   arcana_ast *res =
@@ -85,7 +86,7 @@ arcana_ast *arcana_parser_parse(arcana_parser *parser, arcana_tokens *tokens) {
       .ast = res,
 
       .token_cursor = 0,
-      .node_cursor = 0,
+      .node_cursor = 1,
       .data_cursor = 0,
       .subroot = 0,
       .status = 0,
@@ -94,11 +95,21 @@ arcana_ast *arcana_parser_parse(arcana_parser *parser, arcana_tokens *tokens) {
   arcana_state last = parser->init(state);
 
   if (last.status) {
+    if (error) {
+      error->status = last.status;
+      error->token = last.token_cursor;
+    }
+
     arcana_ast_deinit(res);
     return NULL;
   }
 
   if (!arcana_state_done(last)) {
+    if (error) {
+      error->status = last.status;
+      error->token = last.token_cursor;
+    }
+
     arcana_ast_deinit(res);
     return NULL;
   }
