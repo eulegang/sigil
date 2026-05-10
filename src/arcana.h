@@ -167,6 +167,18 @@ arcana_ast *arcana_parser_parse(arcana_parser *, arcana_tokens *,
 arcana_state arcana_parser_parse_expr(arcana_parser *, arcana_state, size_t);
 
 /*
+ * Overlay
+ */
+
+typedef struct arcana_overlay arcana_overlay;
+
+arcana_overlay *arcana_overlay_init(arcana_ast *, size_t pages);
+void arcana_overlay_deinit(arcana_overlay *);
+
+void *arcana_overlay_alloc(arcana_overlay *, uint16_t node, size_t);
+void *arcana_overlay_resolve(arcana_overlay *, uint16_t node);
+
+/*
  * Lexer Util
  */
 

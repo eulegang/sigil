@@ -14,6 +14,7 @@ add_library(
   src/parse.c
   src/ast.c
   src/state.c
+  src/overlay.c
 )
 
 find_package(GTest REQUIRED)

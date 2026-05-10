@@ -23,4 +23,10 @@ struct arcana_parser {
   arcana_subparser init;
 };
 
+struct arcana_overlay {
+  size_t len;
+  uint16_t entries;
+  uint16_t data;
+};
+
 #endif
