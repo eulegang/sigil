@@ -23,7 +23,10 @@ arcana_overlay *arcana_overlay_init(arcana_ast *ast, size_t pages) {
   return self;
 }
 
-void arcana_overlay_deinit(arcana_overlay *self) { munmap(self, self->len); }
+void arcana_overlay_deinit(arcana_overlay *self) {
+  if (self)
+    munmap(self, self->len);
+}
 
 void *arcana_overlay_alloc(arcana_overlay *self, uint16_t node, size_t size) {
   uint16_t *entries = (uint16_t *)(self + 1);

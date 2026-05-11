@@ -5,7 +5,10 @@
 
 #include "types.h"
 
-void arcana_ast_deinit(arcana_ast *ast) { munmap(ast, ast->cap); }
+void arcana_ast_deinit(arcana_ast *ast) {
+  if (ast)
+    munmap(ast, ast->cap);
+}
 
 arcana_node *arcana_ast_nodes(arcana_ast *ast) { return (void *)(ast + 1); }
 uint16_t arcana_ast_node_count(arcana_ast *ast) { return ast->nodes; }
