@@ -7,6 +7,7 @@
 #include <sys/types.h>
 
 #ifdef __cplusplus
+#include <memory>
 extern "C" {
 #endif
 
@@ -177,6 +178,26 @@ void sigil_overlay_deinit(sigil_overlay *);
 void *sigil_overlay_alloc(sigil_overlay *, uint16_t node, size_t);
 void *sigil_overlay_resolve(sigil_overlay *, uint16_t node);
 
+#ifdef __cplusplus
+// template <typename T> struct Overlay {
+//   using Ptr = std::unique_ptr<arcana_overlay,
+//   decltype(&arcana_overlay_deinit)>; Ptr ptr;
+//
+//   Overlay() : ptr{Ptr(nullptr, arcana_overlay_deinit)} {}
+//
+//   Overlay(arcana_ast *ast, size_t pages)
+//       : ptr{Ptr(arcana_overlay_init(ast, pages), arcana_overlay_deinit)} {}
+//
+//   T *alloc(uint16_t node_id) {
+//     return (T *)arcana_overlay_alloc(ptr.get(), node_id, sizeof(T));
+//   }
+//
+//   T *resolve(uint16_t node_id) {
+//     return (T *)arcana_overlay_resolve(ptr.get(), node_id);
+//   }
+// };
+#endif
+
 /*
  * Lexer Util
  */
@@ -187,5 +208,76 @@ ssize_t sigil_util_take_stateful(sigil_slice, void *, bool (*)(void *, char));
 
 #ifdef __cplusplus
 }
+namespace sigil {
+template <typename T> struct Tokens final {
+  static_assert(sizeof(T) == 4);
+
+  struct Token final {
+    T type;
+    uint16_t off;
+    uint16_t len;
+  };
+
+  using Ptr = std::unique_ptr<sigil_tokens, decltype(&sigil_tokens_deinit)>;
+  using Idx = uint16_t;
+
+  Ptr ptr;
+
+  Tokens(sigil_tokens *tokens) : ptr{tokens, sigil_tokens_deinit} {}
+  Tokens(std::string_view content, sigil_tokenizer tokenizer)
+      : ptr{nullptr, sigil_tokens_deinit} {
+    sigil_slice buf = {.data = content.data(), .len = content.length()};
+
+    sigil_tokens_options opts = {
+        .content = buf,
+        .tokenizer = tokenizer,
+    };
+
+    sigil_tokens_error err;
+    sigil_tokens *tokens = sigil_tokens_init(opts, &err);
+
+    if (!tokens)
+      throw err;
+
+    ptr = Ptr(tokens, sigil_tokens_deinit);
+  }
+
+  size_t length() { return sigil_tokens_len(ptr.get()); }
+  size_t capacity() { return sigil_tokens_capacity(ptr.get()); }
+
+  Token &operator[](Idx idx) const {
+    return *(Token *)(sigil_tokens_data(ptr.get()) + idx);
+  }
+
+  sigil_linemeta linemeta(Idx idx) {
+    return sigil_tokens_linemeta(ptr.get())[idx];
+  }
+
+  std::string_view content(Idx idx) {
+    sigil_slice slice = sigil_tokens_slice(ptr.get(), idx);
+    return std::string_view(slice.data, slice.len);
+  }
+};
+
+template <typename T> struct Overlay {
+  using Ptr = std::unique_ptr<sigil_overlay, decltype(&sigil_overlay_deinit)>;
+  Ptr ptr;
+
+  Overlay() : ptr{Ptr(nullptr, sigil_overlay_deinit)} {}
+
+  Overlay(sigil_ast *ast, size_t pages)
+      : ptr{Ptr(sigil_overlay_init(ast, pages), sigil_overlay_deinit)} {}
+
+  T *alloc(uint16_t node_id) {
+    return (T *)sigil_overlay_alloc(ptr.get(), node_id, sizeof(T));
+  }
+
+  T *resolve(uint16_t node_id) {
+    return (T *)sigil_overlay_resolve(ptr.get(), node_id);
+  }
+};
+} // namespace sigil
+
 #endif
+
 #endif
