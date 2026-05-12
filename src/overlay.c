@@ -1,14 +1,14 @@
-#include "arcana.h"
+#include "sigil.h"
 #include "types.h"
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
-typedef struct arcana_overlay arcana_overlay;
+typedef struct sigil_overlay sigil_overlay;
 
-arcana_overlay *arcana_overlay_init(arcana_ast *ast, size_t pages) {
+sigil_overlay *sigil_overlay_init(sigil_ast *ast, size_t pages) {
   size_t len = pages * getpagesize();
-  arcana_overlay *self =
+  sigil_overlay *self =
       mmap(0, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 
   if (self == MAP_FAILED) {
@@ -23,12 +23,12 @@ arcana_overlay *arcana_overlay_init(arcana_ast *ast, size_t pages) {
   return self;
 }
 
-void arcana_overlay_deinit(arcana_overlay *self) {
+void sigil_overlay_deinit(sigil_overlay *self) {
   if (self)
     munmap(self, self->len);
 }
 
-void *arcana_overlay_alloc(arcana_overlay *self, uint16_t node, size_t size) {
+void *sigil_overlay_alloc(sigil_overlay *self, uint16_t node, size_t size) {
   uint16_t *entries = (uint16_t *)(self + 1);
   if (entries[node] != 0xFFFF) {
     return NULL;
@@ -42,7 +42,7 @@ void *arcana_overlay_alloc(arcana_overlay *self, uint16_t node, size_t size) {
   return (void *)(base + entries[node]);
 }
 
-void *arcana_overlay_resolve(arcana_overlay *self, uint16_t node) {
+void *sigil_overlay_resolve(sigil_overlay *self, uint16_t node) {
   uint16_t *entries = (uint16_t *)(self + 1);
   uint16_t offset = entries[node];
 

@@ -1,6 +1,6 @@
 
-#include "arcana.h"
 #include "monkey.h"
+#include "sigil.h"
 #include <cstdint>
 
 #include <cstdio>
@@ -15,18 +15,18 @@
 #define debug(msg, ...)
 #endif
 
-#define token(T) (arcana_token_type) monkey_token_type::T
+#define token(T) (sigil_token_type) monkey_token_type::T
 
-arcana_parser *monkey_parser;
+sigil_parser *monkey_parser;
 
-arcana_state monkey_parse_let(arcana_state state) {
-  arcana_node *nodes = arcana_ast_nodes(state.ast);
-  void *data = arcana_ast_data(state.ast);
+sigil_state monkey_parse_let(sigil_state state) {
+  sigil_node *nodes = sigil_ast_nodes(state.ast);
+  void *data = sigil_ast_data(state.ast);
 
-  uint16_t let_node = arcana_state_alloc_node(&state);
-  uint16_t ident_node = arcana_state_alloc_node(&state);
+  uint16_t let_node = sigil_state_alloc_node(&state);
+  uint16_t ident_node = sigil_state_alloc_node(&state);
 
-  uint16_t ident_addr = arcana_state_malloc(&state, sizeof(monkey_slice));
+  uint16_t ident_addr = sigil_state_malloc(&state, sizeof(monkey_slice));
 
   if (state.status) {
     return state;
@@ -46,44 +46,44 @@ arcana_state monkey_parse_let(arcana_state state) {
       .type = (uint16_t)monkey_node_type::ident,
   };
 
-  state = arcana_state_expect_token(state, (uint16_t)monkey_token_type::let);
+  state = sigil_state_expect_token(state, (uint16_t)monkey_token_type::let);
   if (state.status) {
     return state;
   }
 
-  arcana_state_next(&state);
+  sigil_state_next(&state);
   if (state.status) {
     return state;
   }
 
-  state = arcana_state_expect_token(state, (uint16_t)monkey_token_type::ident);
+  state = sigil_state_expect_token(state, (uint16_t)monkey_token_type::ident);
   if (state.status) {
     return state;
   }
 
-  arcana_token token = arcana_tokens_data(state.tokens)[state.token_cursor];
+  sigil_token token = sigil_tokens_data(state.tokens)[state.token_cursor];
   *(monkey_slice *)((char *)data + ident_addr) = {
       .base = token.off,
       .len = token.len,
   };
 
-  arcana_state_next(&state);
+  sigil_state_next(&state);
   if (state.status) {
     return state;
   }
 
-  state = arcana_state_expect_token(state, (uint16_t)monkey_token_type::assign);
+  state = sigil_state_expect_token(state, (uint16_t)monkey_token_type::assign);
   if (state.status) {
     return state;
   }
 
-  arcana_state_next(&state);
+  sigil_state_next(&state);
   if (state.status) {
     return state;
   }
 
-  arcana_state expr_state = arcana_parser_parse_expr(
-      monkey_parser, state, (size_t)monkey_perc::LOWEST);
+  sigil_state expr_state = sigil_parser_parse_expr(monkey_parser, state,
+                                                   (size_t)monkey_perc::LOWEST);
 
   if (expr_state.status) {
     return expr_state;
@@ -92,12 +92,12 @@ arcana_state monkey_parse_let(arcana_state state) {
   nodes[ident_node].next = expr_state.subroot;
 
   state =
-      arcana_state_expect_token(expr_state, (uint16_t)monkey_token_type::semi);
+      sigil_state_expect_token(expr_state, (uint16_t)monkey_token_type::semi);
   if (state.status) {
     return state;
   }
 
-  arcana_state_next(&state);
+  sigil_state_next(&state);
   if (state.status) {
     return state;
   }
@@ -107,18 +107,18 @@ arcana_state monkey_parse_let(arcana_state state) {
   return state;
 }
 
-arcana_state monkey_parse_file(arcana_state state) {
+sigil_state monkey_parse_file(sigil_state state) {
   uint16_t last = 0xFFFF;
 
-  while (!arcana_state_done(state)) {
+  while (!sigil_state_done(state)) {
     state = monkey_parse_let(state);
 
     if (last != 0xFFFF) {
-      arcana_node *node = arcana_ast_nodes(state.ast) + last;
+      sigil_node *node = sigil_ast_nodes(state.ast) + last;
       node->next = state.subroot;
       last = state.subroot;
     } else {
-      arcana_node *node = arcana_ast_nodes(state.ast);
+      sigil_node *node = sigil_ast_nodes(state.ast);
       node[0] = node[state.subroot];
       last = 0;
     }
@@ -131,31 +131,31 @@ arcana_state monkey_parse_file(arcana_state state) {
   return state;
 }
 
-arcana_state monkey_parse_paren(arcana_state state) {
-  arcana_state_next(&state);
+sigil_state monkey_parse_paren(sigil_state state) {
+  sigil_state_next(&state);
 
-  state = arcana_parser_parse_expr(monkey_parser, state,
-                                   (size_t)monkey_perc::LOWEST);
+  state = sigil_parser_parse_expr(monkey_parser, state,
+                                  (size_t)monkey_perc::LOWEST);
   if (state.status)
     return state;
 
-  state = arcana_state_expect_token(
-      state, (arcana_token_type)monkey_token_type::rparen);
+  state = sigil_state_expect_token(state,
+                                   (sigil_token_type)monkey_token_type::rparen);
 
   if (state.status)
     return state;
 
-  arcana_state_next(&state);
+  sigil_state_next(&state);
 
   return state;
 }
 
-arcana_state monkey_parse_infix(arcana_state state, uint16_t id) {
-  arcana_node *nodes = arcana_ast_nodes(state.ast);
-  arcana_token token = arcana_state_token(state);
+sigil_state monkey_parse_infix(sigil_state state, uint16_t id) {
+  sigil_node *nodes = sigil_ast_nodes(state.ast);
+  sigil_token token = sigil_state_token(state);
 
-  uint16_t node = arcana_state_alloc_node(&state);
-  uint16_t addr = arcana_state_malloc(&state, sizeof(monkey_slice));
+  uint16_t node = sigil_state_alloc_node(&state);
+  uint16_t addr = sigil_state_malloc(&state, sizeof(monkey_slice));
 
   if (state.status) {
     return state;
@@ -191,10 +191,10 @@ arcana_state monkey_parse_infix(arcana_state state, uint16_t id) {
     break;
   }
 
-  size_t perc = arcana_parser_slots(monkey_parser)[token.type].perc;
-  arcana_state_next(&state);
+  size_t perc = sigil_parser_slots(monkey_parser)[token.type].perc;
+  sigil_state_next(&state);
 
-  arcana_state next = arcana_parser_parse_expr(monkey_parser, state, perc);
+  sigil_state next = sigil_parser_parse_expr(monkey_parser, state, perc);
   if (next.status) {
     return next;
   }
@@ -205,12 +205,12 @@ arcana_state monkey_parse_infix(arcana_state state, uint16_t id) {
   return next;
 }
 
-arcana_state monkey_parse_ident(arcana_state state) {
-  arcana_node *nodes = arcana_ast_nodes(state.ast);
-  void *data = arcana_ast_data(state.ast);
+sigil_state monkey_parse_ident(sigil_state state) {
+  sigil_node *nodes = sigil_ast_nodes(state.ast);
+  void *data = sigil_ast_data(state.ast);
 
-  uint16_t ident_node = arcana_state_alloc_node(&state);
-  uint16_t ident_addr = arcana_state_malloc(&state, sizeof(monkey_slice));
+  uint16_t ident_node = sigil_state_alloc_node(&state);
+  uint16_t ident_addr = sigil_state_malloc(&state, sizeof(monkey_slice));
 
   if (state.status) {
     return state;
@@ -223,13 +223,13 @@ arcana_state monkey_parse_ident(arcana_state state) {
       .type = (uint16_t)monkey_node_type::ident,
   };
 
-  arcana_token token = arcana_tokens_data(state.tokens)[state.token_cursor];
+  sigil_token token = sigil_tokens_data(state.tokens)[state.token_cursor];
   *(monkey_slice *)((char *)data + ident_addr) = {
       .base = token.off,
       .len = token.len,
   };
 
-  arcana_state_next(&state);
+  sigil_state_next(&state);
   if (state.status) {
     return state;
   }
@@ -238,13 +238,13 @@ arcana_state monkey_parse_ident(arcana_state state) {
   return state;
 }
 
-arcana_state monkey_parse_number(arcana_state state) {
-  arcana_node *nodes = arcana_ast_nodes(state.ast);
-  void *data = arcana_ast_data(state.ast);
-  arcana_token token = arcana_state_token(state);
+sigil_state monkey_parse_number(sigil_state state) {
+  sigil_node *nodes = sigil_ast_nodes(state.ast);
+  void *data = sigil_ast_data(state.ast);
+  sigil_token token = sigil_state_token(state);
 
-  uint16_t node = arcana_state_alloc_node(&state);
-  uint16_t addr = arcana_state_malloc(&state, sizeof(monkey_slice));
+  uint16_t node = sigil_state_alloc_node(&state);
+  uint16_t addr = sigil_state_malloc(&state, sizeof(monkey_slice));
 
   if (state.status) {
     return state;
@@ -261,38 +261,37 @@ arcana_state monkey_parse_number(arcana_state state) {
   slice->base = token.off;
   slice->len = token.len;
 
-  arcana_state_next(&state);
+  sigil_state_next(&state);
 
   state.subroot = node;
 
   return state;
 }
 
-bool monkey_is_terminal(arcana_token_type token) {
-  return token == (arcana_token_type)monkey_token_type::semi;
+bool monkey_is_terminal(sigil_token_type token) {
+  return token == (sigil_token_type)monkey_token_type::semi;
 }
 
 void monkey_init_system(void) {
-  monkey_parser = arcana_parser_init(((size_t)monkey_token_type::div + 1),
-                                     monkey_is_terminal, monkey_parse_file);
+  monkey_parser = sigil_parser_init(((size_t)monkey_token_type::div + 1),
+                                    monkey_is_terminal, monkey_parse_file);
 
-  arcana_parser_slot *slots = arcana_parser_slots(monkey_parser);
+  sigil_parser_slot *slots = sigil_parser_slots(monkey_parser);
 
-  slots[(arcana_token_type)monkey_token_type::number].prefix =
+  slots[(sigil_token_type)monkey_token_type::number].prefix =
       monkey_parse_number;
-  slots[(arcana_token_type)monkey_token_type::lparen].prefix =
+  slots[(sigil_token_type)monkey_token_type::lparen].prefix =
       monkey_parse_paren;
-  slots[(arcana_token_type)monkey_token_type::ident].prefix =
-      monkey_parse_ident;
+  slots[(sigil_token_type)monkey_token_type::ident].prefix = monkey_parse_ident;
 
-  slots[(arcana_token_type)monkey_token_type::plus] = {
+  slots[(sigil_token_type)monkey_token_type::plus] = {
       .prefix = NULL,
       .postfix = NULL,
       .infix = monkey_parse_infix,
       .perc = (size_t)monkey_perc::SUM,
   };
 
-  slots[(arcana_token_type)monkey_token_type::mult] = {
+  slots[(sigil_token_type)monkey_token_type::mult] = {
       .prefix = NULL,
       .postfix = NULL,
       .infix = monkey_parse_infix,
@@ -300,4 +299,4 @@ void monkey_init_system(void) {
   };
 }
 
-void monkey_deinit_system(void) { arcana_parser_deinit(monkey_parser); }
+void monkey_deinit_system(void) { sigil_parser_deinit(monkey_parser); }

@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-#include "arcana.h"
+#include "sigil.h"
 
-bool operator==(const arcana_slice, std::string_view);
-std::ostream &operator<<(std::ostream &os, const arcana_slice);
+bool operator==(const sigil_slice, std::string_view);
+std::ostream &operator<<(std::ostream &os, const sigil_slice);

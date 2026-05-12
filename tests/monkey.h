@@ -1,11 +1,11 @@
 #ifndef _MONKEY_H
 #define _MONKEY_H
 
-#include "arcana.h"
+#include "sigil.h"
 #include <cstddef>
 #include <cstdint>
 
-extern arcana_parser *monkey_parser;
+extern sigil_parser *monkey_parser;
 struct monkey_slice {
   uint16_t base;
   uint16_t len;
@@ -46,13 +46,13 @@ enum class monkey_perc : size_t {
   HIGHEST,
 };
 
-ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
-                         arcana_token_type *type);
+ssize_t monkey_tokenizer(size_t cur, sigil_slice content,
+                         sigil_token_type *type);
 
-arcana_state monkey_parse_file(arcana_state);
+sigil_state monkey_parse_file(sigil_state);
 
-void monkey_debug_tree(arcana_node node, void *data, size_t level,
-                       arcana_slice content, void *);
+void monkey_debug_tree(sigil_node node, void *data, size_t level,
+                       sigil_slice content, void *);
 
 void monkey_init_system(void) __attribute__((constructor));
 void monkey_deinit_system(void) __attribute__((destructor));

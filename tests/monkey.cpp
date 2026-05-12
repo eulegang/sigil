@@ -1,11 +1,11 @@
 
 #include "monkey.h"
-#include "arcana.h"
+#include "sigil.h"
 
-#define token(T) (arcana_token_type) monkey_token_type::T
+#define token(T) (sigil_token_type) monkey_token_type::T
 
-arcana_slice pull_word(arcana_slice content, uint16_t offset) {
-  arcana_slice s = {.data = content.data + (size_t)offset, .len = 0};
+sigil_slice pull_word(sigil_slice content, uint16_t offset) {
+  sigil_slice s = {.data = content.data + (size_t)offset, .len = 0};
 
   while (offset + s.len < content.len) {
     char c = s.data[s.len];
@@ -25,8 +25,8 @@ arcana_slice pull_word(arcana_slice content, uint16_t offset) {
   return s;
 }
 
-arcana_slice pull_number(arcana_slice content, uint16_t offset) {
-  arcana_slice s = {.data = content.data + (size_t)offset, .len = 0};
+sigil_slice pull_number(sigil_slice content, uint16_t offset) {
+  sigil_slice s = {.data = content.data + (size_t)offset, .len = 0};
 
   while (offset + s.len < content.len) {
     char c = s.data[s.len];
@@ -44,21 +44,21 @@ arcana_slice pull_number(arcana_slice content, uint16_t offset) {
   return s;
 }
 
-arcana_table *monkey_table() {
-  static arcana_table *table = NULL;
+sigil_table *monkey_table() {
+  static sigil_table *table = NULL;
 
   if (!table) {
-    table = arcana_table_init();
-    arcana_table_push(&table, "let");
+    table = sigil_table_init();
+    sigil_table_push(&table, "let");
   }
 
   return table;
 }
 
-ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
-                         arcana_token_type *type) {
+ssize_t monkey_tokenizer(size_t cur, sigil_slice content,
+                         sigil_token_type *type) {
 
-  arcana_slice window = arcana_slice_advance(content, cur);
+  sigil_slice window = sigil_slice_advance(content, cur);
   ssize_t i = 0;
 
   const char ch = content.data[cur];
@@ -99,7 +99,7 @@ ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
     return 1;
 
   case 'l':
-    if ((i = arcana_util_keyword(window, "let"))) {
+    if ((i = sigil_util_keyword(window, "let"))) {
       *type = token(let);
       return i;
     }
@@ -107,13 +107,13 @@ ssize_t monkey_tokenizer(size_t cur, arcana_slice content,
   }
 
   if (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch == '_') {
-    arcana_slice c = pull_word(content, cur);
+    sigil_slice c = pull_word(content, cur);
     *type = token(ident);
     return c.len;
   }
 
   if ('0' <= ch && ch <= '9') {
-    arcana_slice c = pull_number(content, cur);
+    sigil_slice c = pull_number(content, cur);
     *type = token(number);
     return c.len;
   }

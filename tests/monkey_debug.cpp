@@ -1,11 +1,11 @@
 
-#include "arcana.h"
 #include "monkey.h"
+#include "sigil.h"
 #include <iostream>
 #include <string>
 
-void monkey_debug_tree(arcana_node node, void *addr, size_t level,
-                       arcana_slice content, void *ctx) {
+void monkey_debug_tree(sigil_node node, void *addr, size_t level,
+                       sigil_slice content, void *ctx) {
 
   std::ostream &out = *(std::ostream *)ctx;
 

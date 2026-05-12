@@ -1,53 +1,53 @@
-#include "arcana.h"
+#include "sigil.h"
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
 #include "types.h"
 
-arcana_token arcana_state_token(arcana_state state) {
-  return arcana_tokens_data(state.tokens)[state.token_cursor];
+sigil_token sigil_state_token(sigil_state state) {
+  return sigil_tokens_data(state.tokens)[state.token_cursor];
 }
 
-arcana_token arcana_state_peek(arcana_state state, size_t off) {
-  return arcana_tokens_data(state.tokens)[state.token_cursor + off];
+sigil_token sigil_state_peek(sigil_state state, size_t off) {
+  return sigil_tokens_data(state.tokens)[state.token_cursor + off];
 }
 
-arcana_state arcana_state_expect_token(arcana_state state,
-                                       arcana_token_type token_type) {
-  arcana_token token = arcana_state_token(state);
+sigil_state sigil_state_expect_token(sigil_state state,
+                                     sigil_token_type token_type) {
+  sigil_token token = sigil_state_token(state);
   if (token.type != token_type) {
     state.status = 1;
   }
   return state;
 }
 
-uint16_t arcana_state_malloc(arcana_state *state, size_t size) {
+uint16_t sigil_state_malloc(sigil_state *state, size_t size) {
   uint16_t cursor = state->data_cursor;
   state->data_cursor += size;
   return cursor;
 }
 
-uint16_t arcana_state_alloc_node(arcana_state *state) {
+uint16_t sigil_state_alloc_node(sigil_state *state) {
   return state->node_cursor++;
 }
 
-arcana_node *arcana_state_node(arcana_state state, uint16_t idx) {
-  return arcana_ast_nodes(state.ast) + idx;
+sigil_node *sigil_state_node(sigil_state state, uint16_t idx) {
+  return sigil_ast_nodes(state.ast) + idx;
 }
 
-void *arcana_state_data(arcana_state state, uint16_t idx) {
-  return (void *)((char *)arcana_ast_data(state.ast) + idx);
+void *sigil_state_data(sigil_state state, uint16_t idx) {
+  return (void *)((char *)sigil_ast_data(state.ast) + idx);
 }
 
-void arcana_state_next(arcana_state *state) {
-  if (state->token_cursor >= arcana_tokens_len(state->tokens)) {
+void sigil_state_next(sigil_state *state) {
+  if (state->token_cursor >= sigil_tokens_len(state->tokens)) {
     state->status |= 2;
   } else {
     state->token_cursor += 1;
   }
 }
 
-bool arcana_state_done(arcana_state state) {
-  return state.token_cursor >= arcana_tokens_len(state.tokens);
+bool sigil_state_done(sigil_state state) {
+  return state.token_cursor >= sigil_tokens_len(state.tokens);
 }

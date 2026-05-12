@@ -1,24 +1,24 @@
 #include <gtest/gtest.h>
 
-#include "arcana.h"
+#include "sigil.h"
 
 TEST(token_table, insertion) {
-  arcana_token_table_t *table = arcana_token_table_init();
+  sigil_token_table_t *table = sigil_token_table_init();
   ASSERT_NE(table, nullptr);
 
-  arcana_token_table_push(&table, "let");
-  arcana_token_table_push(&table, "semi");
-  arcana_token_table_push(&table, "open");
-  arcana_token_table_push(&table, "close");
-  arcana_token_table_push(&table, "assign");
+  sigil_token_table_push(&table, "let");
+  sigil_token_table_push(&table, "semi");
+  sigil_token_table_push(&table, "open");
+  sigil_token_table_push(&table, "close");
+  sigil_token_table_push(&table, "assign");
 
-  EXPECT_EQ(arcana_token_table_len(table), 5);
+  EXPECT_EQ(sigil_token_table_len(table), 5);
 
-  EXPECT_EQ(arcana_token_table_data(table)[0], "let");
-  EXPECT_EQ(arcana_token_table_data(table)[1], "semi");
-  EXPECT_EQ(arcana_token_table_data(table)[2], "open");
-  EXPECT_EQ(arcana_token_table_data(table)[3], "close");
-  EXPECT_EQ(arcana_token_table_data(table)[4], "assign");
+  EXPECT_EQ(sigil_token_table_data(table)[0], "let");
+  EXPECT_EQ(sigil_token_table_data(table)[1], "semi");
+  EXPECT_EQ(sigil_token_table_data(table)[2], "open");
+  EXPECT_EQ(sigil_token_table_data(table)[3], "close");
+  EXPECT_EQ(sigil_token_table_data(table)[4], "assign");
 
-  arcana_token_table_deinit(table);
+  sigil_token_table_deinit(table);
 }

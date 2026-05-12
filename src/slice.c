@@ -1,7 +1,7 @@
-#include "arcana.h"
+#include "sigil.h"
 
-arcana_slice arcana_slice_advance(arcana_slice slice, size_t inc) {
-  return (arcana_slice){
+sigil_slice sigil_slice_advance(sigil_slice slice, size_t inc) {
+  return (sigil_slice){
       .data = slice.data + inc,
       .len = slice.len - inc,
   };
