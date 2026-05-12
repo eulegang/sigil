@@ -178,26 +178,6 @@ void sigil_overlay_deinit(sigil_overlay *);
 void *sigil_overlay_alloc(sigil_overlay *, uint16_t node, size_t);
 void *sigil_overlay_resolve(sigil_overlay *, uint16_t node);
 
-#ifdef __cplusplus
-// template <typename T> struct Overlay {
-//   using Ptr = std::unique_ptr<arcana_overlay,
-//   decltype(&arcana_overlay_deinit)>; Ptr ptr;
-//
-//   Overlay() : ptr{Ptr(nullptr, arcana_overlay_deinit)} {}
-//
-//   Overlay(arcana_ast *ast, size_t pages)
-//       : ptr{Ptr(arcana_overlay_init(ast, pages), arcana_overlay_deinit)} {}
-//
-//   T *alloc(uint16_t node_id) {
-//     return (T *)arcana_overlay_alloc(ptr.get(), node_id, sizeof(T));
-//   }
-//
-//   T *resolve(uint16_t node_id) {
-//     return (T *)arcana_overlay_resolve(ptr.get(), node_id);
-//   }
-// };
-#endif
-
 /*
  * Lexer Util
  */
