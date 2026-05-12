@@ -274,11 +274,11 @@ template <typename T> struct Ast {
     sigil_ast_visit(ptr.get(), ctx, fn);
   }
 
-  // template <typename Ctx>
-  // void visit(Ctx *ctx, void (*fn)(uint16_t id, Node node, void *data,
-  //                                 size_t level, Ctx *ctx)) {
-  //   sigil_ast_visit(ptr.get(), ctx, fn);
-  // }
+  template <typename Ctx>
+  void visit(Ctx *ctx, void (*fn)(uint16_t id, Node node, void *data,
+                                  size_t level, Ctx *ctx)) {
+    sigil_ast_visit(ptr.get(), ctx, (sigil_ast_visit_fn)(void *)fn);
+  }
 };
 
 template <typename T> struct Overlay {

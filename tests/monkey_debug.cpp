@@ -4,18 +4,15 @@
 #include <iostream>
 #include <string>
 
-void monkey_debug_tree(uint16_t, sigil_node node, void *addr, size_t level,
-                       void *rctx) {
-  DebugCtx *ctx = (DebugCtx *)rctx;
+void monkey_debug_tree(uint16_t, sigil::Ast<monkey_node_type>::Node node,
+                       void *addr, size_t level, DebugCtx *ctx) {
 
   std::ostream &out = *ctx->out;
   std::string_view content = ctx->buffer;
 
-  auto ty = (monkey_node_type)node.type;
-
   out << std::string(2 * level, ' ');
 
-  switch (ty) {
+  switch (node.type) {
   case monkey_node_type::let:
     out << "let" << std::endl;
     break;

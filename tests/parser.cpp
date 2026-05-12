@@ -116,12 +116,6 @@ TEST(parse, expr) {
   };
 
   ast.visit(&ctx, monkey_debug_tree);
-  // sigil_ast_visit(ast, output.get(), monkey_debug_tree);
-  // std::span<sigil_node> nodes{
-  //     sigil_ast_nodes(ast),
-  //     sigil_ast_node_count(ast),
-  // };
-
   std::string s = output->str();
 
   EXPECT_EQ(s, "let\n"
@@ -143,6 +137,5 @@ TEST(parse, expr) {
                "        lit (1)\n"
                "");
 
-  // sigil_ast_deinit(ast);
   sigil_tokens_deinit(tokens);
 }

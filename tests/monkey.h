@@ -56,8 +56,8 @@ struct DebugCtx {
   std::string_view buffer;
 };
 
-void monkey_debug_tree(uint16_t id, sigil_node node, void *data, size_t level,
-                       void *);
+void monkey_debug_tree(uint16_t id, sigil::Ast<monkey_node_type>::Node node,
+                       void *data, size_t level, DebugCtx *);
 
 void monkey_init_system(void) __attribute__((constructor));
 void monkey_deinit_system(void) __attribute__((destructor));
