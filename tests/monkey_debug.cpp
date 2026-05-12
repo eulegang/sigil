@@ -4,10 +4,12 @@
 #include <iostream>
 #include <string>
 
-void monkey_debug_tree(sigil_node node, void *addr, size_t level,
-                       sigil_slice content, void *ctx) {
+void monkey_debug_tree(uint16_t, sigil_node node, void *addr, size_t level,
+                       void *rctx) {
+  DebugCtx *ctx = (DebugCtx *)rctx;
 
-  std::ostream &out = *(std::ostream *)ctx;
+  std::ostream &out = *ctx->out;
+  std::string_view content = ctx->buffer;
 
   auto ty = (monkey_node_type)node.type;
 
@@ -20,14 +22,14 @@ void monkey_debug_tree(sigil_node node, void *addr, size_t level,
 
   case monkey_node_type::ident: {
     monkey_slice ms = *(monkey_slice *)addr;
-    std::string_view slice{content.data + ms.base, ms.len};
+    std::string_view slice = content.substr(ms.base, ms.len);
 
     out << "ident" << " (" << slice << ")" << std::endl;
   } break;
 
   case monkey_node_type::lit: {
     monkey_slice ms = *(monkey_slice *)addr;
-    std::string_view slice{content.data + ms.base, ms.len};
+    std::string_view slice = content.substr(ms.base, ms.len);
     out << "lit" << " (" << slice << ")" << std::endl;
   } break;
 

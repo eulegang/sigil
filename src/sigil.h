@@ -102,11 +102,10 @@ uint16_t sigil_ast_node_count(sigil_ast *);
 uint16_t sigil_ast_data_size(sigil_ast *);
 void *sigil_ast_data(sigil_ast *);
 
-typedef void (*sigil_ast_visit_fn)(sigil_node node, void *data, size_t level,
-                                   sigil_slice content, void *ctx);
+typedef void (*sigil_ast_visit_fn)(uint16_t id, sigil_node node, void *data,
+                                   size_t level, void *ctx);
 
-void sigil_ast_visit(sigil_ast *ast, sigil_slice content, void *ctx,
-                     sigil_ast_visit_fn fn);
+void sigil_ast_visit(sigil_ast *ast, void *ctx, sigil_ast_visit_fn fn);
 
 /*
  * State
@@ -237,6 +236,49 @@ template <typename T> struct Tokens final {
     sigil_slice slice = sigil_tokens_slice(ptr.get(), idx);
     return std::string_view(slice.data, slice.len);
   }
+};
+
+template <typename T> struct Ast {
+  static_assert(sizeof(T) == 2);
+
+  using Idx = uint16_t;
+
+  struct Node final {
+    Idx child;
+    Idx next;
+    Idx offset;
+    T type;
+  };
+
+  using Ptr = std::unique_ptr<sigil_ast, decltype(&sigil_ast_deinit)>;
+
+  Ptr ptr;
+
+  Ast(sigil_ast *ast) : ptr{ast, sigil_ast_deinit} {}
+
+  uint16_t node_count() const { return sigil_ast_node_count(ptr.get()); }
+  uint16_t data_size() const { return sigil_ast_data_size(ptr.get()); }
+
+  Node &operator[](Idx idx) {
+    return *(Node *)(sigil_ast_nodes(ptr.get()) + idx);
+  }
+
+  template <typename D> D *data(Idx idx) {
+    if (idx == 0xFFFF)
+      return NULL;
+
+    return (D *)((char *)sigil_ast_data(ptr.get()) + idx);
+  }
+
+  void visit(void *ctx, sigil_ast_visit_fn fn) {
+    sigil_ast_visit(ptr.get(), ctx, fn);
+  }
+
+  // template <typename Ctx>
+  // void visit(Ctx *ctx, void (*fn)(uint16_t id, Node node, void *data,
+  //                                 size_t level, Ctx *ctx)) {
+  //   sigil_ast_visit(ptr.get(), ctx, fn);
+  // }
 };
 
 template <typename T> struct Overlay {

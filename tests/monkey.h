@@ -51,8 +51,13 @@ ssize_t monkey_tokenizer(size_t cur, sigil_slice content,
 
 sigil_state monkey_parse_file(sigil_state);
 
-void monkey_debug_tree(sigil_node node, void *data, size_t level,
-                       sigil_slice content, void *);
+struct DebugCtx {
+  std::ostream *out;
+  std::string_view buffer;
+};
+
+void monkey_debug_tree(uint16_t id, sigil_node node, void *data, size_t level,
+                       void *);
 
 void monkey_init_system(void) __attribute__((constructor));
 void monkey_deinit_system(void) __attribute__((destructor));
