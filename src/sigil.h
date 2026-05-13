@@ -221,6 +221,10 @@ template <typename T> struct Tokens final {
     ptr.reset(tokens);
   }
 
+  Tokens(std::string_view content,
+         ssize_t (*tokenizer)(size_t cur, sigil_slice content, T *type))
+      : Tokens(content, (sigil_tokenizer)tokenizer) {}
+
   size_t length() { return sigil_tokens_len(ptr.get()); }
   size_t capacity() { return sigil_tokens_capacity(ptr.get()); }
 

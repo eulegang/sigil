@@ -47,7 +47,7 @@ enum class monkey_perc : size_t {
 };
 
 ssize_t monkey_tokenizer(size_t cur, sigil_slice content,
-                         sigil_token_type *type);
+                         monkey_token_type *type);
 
 sigil_state monkey_parse_file(sigil_state);
 

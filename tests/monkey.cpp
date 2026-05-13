@@ -2,7 +2,7 @@
 #include "monkey.h"
 #include "sigil.h"
 
-#define token(T) (sigil_token_type) monkey_token_type::T
+#define token(T) monkey_token_type::T
 
 sigil_slice pull_word(sigil_slice content, uint16_t offset) {
   sigil_slice s = {.data = content.data + (size_t)offset, .len = 0};
@@ -56,7 +56,7 @@ sigil_table *monkey_table() {
 }
 
 ssize_t monkey_tokenizer(size_t cur, sigil_slice content,
-                         sigil_token_type *type) {
+                         monkey_token_type *type) {
 
   sigil_slice window = sigil_slice_advance(content, cur);
   ssize_t i = 0;
