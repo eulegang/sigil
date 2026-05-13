@@ -8,22 +8,9 @@
 #include "util.h"
 
 TEST(parse, basic) {
-  const char *buffer = "let x = 1;\nlet y = 12;";
-
-  sigil_slice content = {.data = buffer, .len = strlen(buffer)};
-
-  sigil_tokens_options opts = {
-      .content = content,
-      .tokenizer = monkey_tokenizer,
-  };
-
-  sigil_tokens *tokens = sigil_tokens_init(opts, NULL);
-  ASSERT_NE(tokens, nullptr);
-
-  sigil_ast *raw = sigil_parser_parse(monkey_parser, tokens, NULL);
-  ASSERT_NE(raw, nullptr);
-
-  sigil::Ast<monkey_node_type> ast{raw};
+  std::string_view buffer = "let x = 1;\nlet y = 12;";
+  sigil::Tokens<monkey_token_type> tokens{buffer, monkey_tokenizer};
+  sigil::Ast<monkey_node_type> ast{monkey_parser, tokens};
 
   ASSERT_EQ(ast.node_count(), 7);
   ASSERT_EQ(ast.data_size(), 16);
@@ -82,30 +69,14 @@ TEST(parse, basic) {
   ASSERT_NE(ast.data<monkey_slice>(ast[6].offset), nullptr);
   EXPECT_EQ(ast.data<monkey_slice>(ast[6].offset)->base, 19);
   EXPECT_EQ(ast.data<monkey_slice>(ast[6].offset)->len, 2);
-
-  sigil_tokens_deinit(tokens);
 }
 
 TEST(parse, expr) {
   std::string_view buffer =
       "let x = 1;\nlet y = 12;\nlet z = (x + 1) + 3 * (y + 1);";
 
-  sigil_slice content = {.data = buffer.data(), .len = buffer.length()};
-
-  sigil_tokens_options opts = {
-      .content = content,
-      .tokenizer = monkey_tokenizer,
-  };
-
-  sigil_tokens_error err;
-  sigil_tokens *tokens = sigil_tokens_init(opts, &err);
-  ASSERT_NE(tokens, nullptr)
-      << std::format("position {} {}", err.pos, buffer.substr(err.pos));
-
-  sigil_ast *raw = sigil_parser_parse(monkey_parser, tokens, NULL);
-  ASSERT_NE(raw, nullptr);
-
-  sigil::Ast<monkey_node_type> ast{raw};
+  sigil::Tokens<monkey_token_type> tokens{buffer, monkey_tokenizer};
+  sigil::Ast<monkey_node_type> ast{monkey_parser, tokens};
 
   std::shared_ptr<std::stringstream> output =
       std::make_shared<std::stringstream>();
@@ -136,6 +107,4 @@ TEST(parse, expr) {
                "        ident (y)\n"
                "        lit (1)\n"
                "");
-
-  sigil_tokens_deinit(tokens);
 }

@@ -218,7 +218,7 @@ template <typename T> struct Tokens final {
     if (!tokens)
       throw err;
 
-    ptr = Ptr(tokens, sigil_tokens_deinit);
+    ptr.reset(tokens);
   }
 
   size_t length() { return sigil_tokens_len(ptr.get()); }
@@ -254,6 +254,19 @@ template <typename T> struct Ast {
 
   Ptr ptr;
 
+  template <typename TokenType>
+  Ast(sigil_parser *parser, const Tokens<TokenType> &tokens)
+      : ptr{nullptr, sigil_ast_deinit} {
+
+    sigil_parser_error err;
+    sigil_ast *raw = sigil_parser_parse(parser, tokens.ptr.get(), &err);
+
+    if (!raw) {
+      throw err;
+    }
+
+    ptr.reset(raw);
+  }
   Ast(sigil_ast *ast) : ptr{ast, sigil_ast_deinit} {}
 
   uint16_t node_count() const { return sigil_ast_node_count(ptr.get()); }
