@@ -225,18 +225,18 @@ template <typename T> struct Tokens final {
          ssize_t (*tokenizer)(size_t cur, sigil_slice content, T *type))
       : Tokens(content, (sigil_tokenizer)tokenizer) {}
 
-  size_t length() { return sigil_tokens_len(ptr.get()); }
-  size_t capacity() { return sigil_tokens_capacity(ptr.get()); }
+  size_t length() const { return sigil_tokens_len(ptr.get()); }
+  size_t capacity() const { return sigil_tokens_capacity(ptr.get()); }
 
   Token &operator[](Idx idx) const {
     return *(Token *)(sigil_tokens_data(ptr.get()) + idx);
   }
 
-  sigil_linemeta linemeta(Idx idx) {
+  sigil_linemeta linemeta(Idx idx) const {
     return sigil_tokens_linemeta(ptr.get())[idx];
   }
 
-  std::string_view content(Idx idx) {
+  std::string_view content(Idx idx) const {
     sigil_slice slice = sigil_tokens_slice(ptr.get(), idx);
     return std::string_view(slice.data, slice.len);
   }
@@ -276,24 +276,24 @@ template <typename T> struct Ast {
   uint16_t node_count() const { return sigil_ast_node_count(ptr.get()); }
   uint16_t data_size() const { return sigil_ast_data_size(ptr.get()); }
 
-  Node &operator[](Idx idx) {
+  Node &operator[](Idx idx) const {
     return *(Node *)(sigil_ast_nodes(ptr.get()) + idx);
   }
 
-  template <typename D> D *data(Idx idx) {
+  template <typename D> D *data(Idx idx) const {
     if (idx == 0xFFFF)
       return NULL;
 
     return (D *)((char *)sigil_ast_data(ptr.get()) + idx);
   }
 
-  void visit(void *ctx, sigil_ast_visit_fn fn) {
+  void visit(void *ctx, sigil_ast_visit_fn fn) const {
     sigil_ast_visit(ptr.get(), ctx, fn);
   }
 
   template <typename Ctx>
   void visit(Ctx *ctx, void (*fn)(uint16_t id, Node node, void *data,
-                                  size_t level, Ctx *ctx)) {
+                                  size_t level, Ctx *ctx)) const {
     sigil_ast_visit(ptr.get(), ctx, (sigil_ast_visit_fn)(void *)fn);
   }
 };
@@ -307,11 +307,11 @@ template <typename T> struct Overlay {
   Overlay(sigil_ast *ast, size_t pages)
       : ptr{Ptr(sigil_overlay_init(ast, pages), sigil_overlay_deinit)} {}
 
-  T *alloc(uint16_t node_id) {
+  T *alloc(uint16_t node_id) const {
     return (T *)sigil_overlay_alloc(ptr.get(), node_id, sizeof(T));
   }
 
-  T *resolve(uint16_t node_id) {
+  T *resolve(uint16_t node_id) const {
     return (T *)sigil_overlay_resolve(ptr.get(), node_id);
   }
 };
