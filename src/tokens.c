@@ -154,3 +154,5 @@ sigil_slice sigil_tokens_slice(sigil_tokens *tokens, uint16_t index) {
       .len = len,
   };
 }
+
+sigil_slice sigil_tokens_content(sigil_tokens *self) { return self->content; }

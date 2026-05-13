@@ -68,6 +68,7 @@ size_t sigil_tokens_capacity(sigil_tokens *);
 sigil_token *sigil_tokens_data(sigil_tokens *);
 sigil_linemeta *sigil_tokens_linemeta(sigil_tokens *);
 sigil_slice sigil_tokens_slice(sigil_tokens *, uint16_t);
+sigil_slice sigil_tokens_content(sigil_tokens *);
 
 /**
  * Token Table
@@ -238,6 +239,11 @@ template <typename T> struct Tokens final {
 
   std::string_view content(Idx idx) const {
     sigil_slice slice = sigil_tokens_slice(ptr.get(), idx);
+    return std::string_view(slice.data, slice.len);
+  }
+
+  std::string_view content() const {
+    sigil_slice slice = sigil_tokens_content(ptr.get());
     return std::string_view(slice.data, slice.len);
   }
 };
