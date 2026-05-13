@@ -4,5 +4,5 @@ includedir=@CMAKE_INSTALL_PREFIX@/include
 Name: @PROJECT_NAME@
 Description: @PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -larcana 
+Libs: -L${libdir} -lsigil 
 Cflags: -I${includedir}
