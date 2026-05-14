@@ -27,7 +27,7 @@ sigil_tokens *sigil_tokens_init(sigil_tokens_options opts,
 
   if (res == MAP_FAILED) {
     if (error) {
-      error->err = sigil_TOKENS_ERROR_MAP;
+      error->err = SIGIL_TOKENS_ERROR_MAP;
       error->pos = 0;
     }
     return NULL;
@@ -77,7 +77,7 @@ bool sigil_process(sigil_tokens *tokens, sigil_tokens_options opts,
   do {
     if (tokens->len >= cap) {
       if (error) {
-        error->err = sigil_TOKENS_ERROR_OVERFLOW;
+        error->err = SIGIL_TOKENS_ERROR_OVERFLOW;
         error->pos = cur;
       }
       return false;
@@ -86,7 +86,7 @@ bool sigil_process(sigil_tokens *tokens, sigil_tokens_options opts,
     ssize_t inc = opts.tokenizer(cur, opts.content, &type);
     if (inc == 0) {
       if (error) {
-        error->err = sigil_TOKENS_ERROR_INVALID;
+        error->err = SIGIL_TOKENS_ERROR_INVALID;
         error->pos = cur;
       }
       return false;
@@ -96,7 +96,7 @@ bool sigil_process(sigil_tokens *tokens, sigil_tokens_options opts,
     } else {
       if (cur + inc > opts.content.len) {
         if (error) {
-          error->err = sigil_TOKENS_ERROR_OVERFLOW;
+          error->err = SIGIL_TOKENS_ERROR_OVERFLOW;
           error->pos = cur;
         }
         return false;

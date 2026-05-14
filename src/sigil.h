@@ -52,9 +52,9 @@ typedef struct {
   uint32_t pos;
 } sigil_tokens_error;
 
-#define sigil_TOKENS_ERROR_MAP 1
-#define sigil_TOKENS_ERROR_OVERFLOW 2
-#define sigil_TOKENS_ERROR_INVALID 3
+#define SIGIL_TOKENS_ERROR_MAP 1
+#define SIGIL_TOKENS_ERROR_OVERFLOW 2
+#define SIGIL_TOKENS_ERROR_INVALID 3
 
 extern size_t sigil_pages;
 
