@@ -37,5 +37,9 @@ ssize_t sigil_util_keyword(sigil_slice slice, const char *keyword) {
     res++;
   }
 
+  char end = *slice.data;
+  if (('a' <= end && end <= 'z') || ('A' <= end && end <= 'Z'))
+    return 0;
+
   return res;
 }

@@ -28,6 +28,7 @@ add_executable(
   tests/tokens.cpp
   tests/parser.cpp
   tests/util.cpp
+  tests/utilities.cpp
 )
 
 target_include_directories(unit PUBLIC ./src)
