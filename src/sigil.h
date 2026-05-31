@@ -313,7 +313,7 @@ template <typename T> struct Overlay {
   Overlay(sigil_ast *ast, size_t pages)
       : ptr{Ptr(sigil_overlay_init(ast, pages), sigil_overlay_deinit)} {}
 
-  T *alloc(uint16_t node_id) const {
+  T *alloc(uint16_t node_id) {
     return (T *)sigil_overlay_alloc(ptr.get(), node_id, sizeof(T));
   }
 
