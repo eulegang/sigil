@@ -8,6 +8,7 @@
 
 #ifdef __cplusplus
 #include <memory>
+#include <string_view>
 extern "C" {
 #endif
 
