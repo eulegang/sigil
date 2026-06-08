@@ -322,6 +322,16 @@ template <typename T> struct Overlay {
     return (T *)sigil_overlay_resolve(ptr.get(), node_id);
   }
 };
+
+template <typename T, typename N> struct Pass {
+  const sigil::Tokens<T> &tokens;
+  const sigil::Ast<N> &ast;
+
+  Pass(const sigil::Tokens<T> &tokens, const sigil::Ast<N> &ast)
+      : tokens{tokens}, ast{ast} {}
+
+  virtual void run() = 0;
+};
 } // namespace sigil
 
 #endif
