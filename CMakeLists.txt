@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(sigil
   LANGUAGES C CXX
-  VERSION 0.1.0
+  VERSION 0.2.0
   DESCRIPTION "language framework"
 )
 
@@ -36,7 +36,7 @@ target_link_libraries(unit GTest::gtest_main)
 target_link_libraries(unit sigil)
 
 add_test(
-  NAME unit-tests 
+  NAME unit-tests
   COMMAND unit
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
