@@ -69,7 +69,7 @@ sigil_state sigil_parser_parse_expr(sigil_parser *self, sigil_state state,
 
 sigil_ast *sigil_parser_parse(sigil_parser *parser, sigil_tokens *tokens,
                               sigil_parser_error *error) {
-  size_t len = sigil_pages * getpagesize();
+  size_t len = 2 * sigil_pages * getpagesize();
 
   sigil_ast *res =
       mmap(0, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);

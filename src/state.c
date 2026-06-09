@@ -40,6 +40,10 @@ void *sigil_state_data(sigil_state state, uint16_t idx) {
   return (void *)((char *)sigil_ast_data(state.ast) + idx);
 }
 
+void sigil_state_span(sigil_state state, sigil_node_id id, sigil_span span) {
+  sigil_ast_spans(state.ast)[id] = span;
+}
+
 void sigil_state_next(sigil_state *state) {
   if (state->token_cursor >= sigil_tokens_len(state->tokens)) {
     state->status |= 2;

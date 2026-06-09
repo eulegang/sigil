@@ -13,7 +13,16 @@ void sigil_ast_deinit(sigil_ast *ast) {
 sigil_node *sigil_ast_nodes(sigil_ast *ast) { return (void *)(ast + 1); }
 uint16_t sigil_ast_node_count(sigil_ast *ast) { return ast->nodes; }
 uint16_t sigil_ast_data_size(sigil_ast *ast) { return ast->data; }
-void *sigil_ast_data(sigil_ast *ast) { return (void *)ast + (ast->cap / 2); }
+void *sigil_ast_data(sigil_ast *ast) {
+  size_t off = ast->cap >> 1;
+  off += ast->cap >> 2;
+
+  return (void *)ast + off;
+}
+
+sigil_span *sigil_ast_spans(sigil_ast *ast) {
+  return (void *)ast + (ast->cap / 2);
+}
 
 void sigil_ast_visit_recur(sigil_ast *ast, void *ctx, uint16_t id, size_t level,
                            sigil_ast_visit_fn fn) {

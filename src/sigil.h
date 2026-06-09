@@ -28,6 +28,7 @@ sigil_slice sigil_slice_advance(sigil_slice, size_t);
  */
 
 typedef uint32_t sigil_token_type;
+typedef uint16_t sigil_token_id;
 
 typedef struct {
   sigil_token_type type;
@@ -68,7 +69,7 @@ size_t sigil_tokens_len(sigil_tokens *);
 size_t sigil_tokens_capacity(sigil_tokens *);
 sigil_token *sigil_tokens_data(sigil_tokens *);
 sigil_linemeta *sigil_tokens_linemeta(sigil_tokens *);
-sigil_slice sigil_tokens_slice(sigil_tokens *, uint16_t);
+sigil_slice sigil_tokens_slice(sigil_tokens *, sigil_token_id);
 sigil_slice sigil_tokens_content(sigil_tokens *);
 
 /**
@@ -88,12 +89,19 @@ void sigil_table_push(sigil_table **, const char *);
  * Ast
  */
 
+typedef uint16_t sigil_node_id;
+
 typedef struct {
-  uint16_t child;
-  uint16_t next;
+  sigil_node_id child;
+  sigil_node_id next;
   uint16_t offset;
   uint16_t type;
 } sigil_node;
+
+typedef struct {
+  sigil_token_id start;
+  sigil_token_id end;
+} sigil_span;
 
 typedef struct sigil_ast sigil_ast;
 
@@ -103,9 +111,10 @@ sigil_node *sigil_ast_nodes(sigil_ast *);
 uint16_t sigil_ast_node_count(sigil_ast *);
 uint16_t sigil_ast_data_size(sigil_ast *);
 void *sigil_ast_data(sigil_ast *);
+sigil_span *sigil_ast_spans(sigil_ast *);
 
-typedef void (*sigil_ast_visit_fn)(uint16_t id, sigil_node node, void *data,
-                                   size_t level, void *ctx);
+typedef void (*sigil_ast_visit_fn)(sigil_node_id id, sigil_node node,
+                                   void *data, size_t level, void *ctx);
 
 void sigil_ast_visit(sigil_ast *ast, void *ctx, sigil_ast_visit_fn fn);
 
@@ -117,10 +126,10 @@ typedef struct sigil_state {
   sigil_tokens *tokens;
   sigil_ast *ast;
 
-  uint16_t token_cursor;
-  uint16_t node_cursor;
-  uint16_t data_cursor;
-  uint16_t subroot;
+  sigil_token_id token_cursor;
+  sigil_node_id node_cursor;
+  sigil_node_id data_cursor;
+  sigil_node_id subroot;
   uint16_t status;
 } sigil_state;
 
@@ -131,9 +140,10 @@ sigil_state sigil_state_expect_token(sigil_state, sigil_token_type);
 uint16_t sigil_state_malloc(sigil_state *, size_t);
 uint16_t sigil_state_alloc_node(sigil_state *);
 
-sigil_node *sigil_state_node(sigil_state, uint16_t);
-void *sigil_state_data(sigil_state, uint16_t);
+sigil_node *sigil_state_node(sigil_state, sigil_node_id);
+void *sigil_state_data(sigil_state, sigil_node_id);
 
+void sigil_state_span(sigil_state, sigil_node_id, sigil_span);
 void sigil_state_next(sigil_state *);
 bool sigil_state_done(sigil_state);
 
@@ -176,8 +186,8 @@ typedef struct sigil_overlay sigil_overlay;
 sigil_overlay *sigil_overlay_init(sigil_ast *, size_t pages);
 void sigil_overlay_deinit(sigil_overlay *);
 
-void *sigil_overlay_alloc(sigil_overlay *, uint16_t node, size_t);
-void *sigil_overlay_resolve(sigil_overlay *, uint16_t node);
+void *sigil_overlay_alloc(sigil_overlay *, sigil_node_id, size_t);
+void *sigil_overlay_resolve(sigil_overlay *, sigil_node_id);
 
 /*
  * Lexer Util
@@ -200,7 +210,7 @@ template <typename T> struct Tokens final {
   };
 
   using Ptr = std::unique_ptr<sigil_tokens, decltype(&sigil_tokens_deinit)>;
-  using Idx = uint16_t;
+  using Idx = sigil_token_id;
 
   Ptr ptr;
 
@@ -252,7 +262,7 @@ template <typename T> struct Tokens final {
 template <typename T> struct Ast {
   static_assert(sizeof(T) == 2);
 
-  using Idx = uint16_t;
+  using Idx = sigil_node_id;
 
   struct Node final {
     Idx child;
@@ -293,6 +303,8 @@ template <typename T> struct Ast {
 
     return (D *)((char *)sigil_ast_data(ptr.get()) + idx);
   }
+
+  sigil_span span(Idx idx) const { return *(sigil_ast_spans(ptr.get()) + idx); }
 
   void visit(void *ctx, sigil_ast_visit_fn fn) const {
     sigil_ast_visit(ptr.get(), ctx, fn);
